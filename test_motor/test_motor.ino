@@ -25,19 +25,29 @@ const int MSpeedR = 200;
 bool activate = true;
 char commands;
 
-const int Distance_10CM = 252;//278;
+const int Distance_10CM = 245;//278;
 const int Distance_20CM = Distance_10CM * 2;
 const int Distance_30CM = Distance_10CM * 3.23;
 const int d180 = 4750;//5004;//2500;//
 const int d180_stop = 5004;
+
+const int Rotate_45deg = 175;
 const int Rotate_90deg = 357;
 const int Rotate_180deg = Rotate_90deg * 2.18;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
 
+/*
+//For paper testing
+const int Rotate_45deg = 178;
+const int Rotate_90deg = 374;
+const int Rotate_180deg = Rotate_90deg * 2.1105;
+const int Rotate_270deg = Rotate_90deg * 3.19;
+const int Rotate_360deg = Rotate_90deg * 4.28;
+*/
 const boolean DEBUG_MOTO = true;
-const boolean DEBUG_MOVE = false;
-const boolean DEBUG_SENSOR = false;
+const boolean DEBUG_MOVE = true;
+const boolean DEBUG_SENSOR = true;
 
 double integral;
 
@@ -71,7 +81,16 @@ void loop() {
 //  rotate(0, Rotate_180deg); delay(1000);
 //  rotate(0, Rotate_270deg); delay(1000);
 //  rotate(0, Rotate_360deg); delay(1000);
-//  moveFront(d180);
+  moveFront(d180); delay(100);
+//  rotate(180);
+//  moveFront(d180); delay(100);
+//  move(3);// delay(100);
+//  move(3);// delay(100);
+//  move(3); //delay(100);
+//  rotate(180);
+//  move(1); delay(100);
+//  move(2); //delay(100);
+//  detect();
 //  detectAndMove();
 //  rotate(1080);
   delay(100);
@@ -173,14 +192,16 @@ double computePID() {
 //Battery A:
   //6.03V p = 2.4 / i = 0.1 / d = 0.2
   //6.13V p = 1.8 / i = 0.1 / d = 0.1
+  //6.34V p 1.9 / i = 0.1 / d = 0.1
 //Battery B:
   //6.27V+ p = 1.8 / i = 0.1 / d = 0.1
   //6.24V p = 1.7 / i = 0.1 / d = 0.3
   //6.26V p = 1.73
+  //6.2V  p = 1.6 / i = 0.1 / d = 0.2
 
-  kp = 1.7;//2.4//2.1;//2.2 (FOR 300);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
+  kp = 1.8;//2.4//2.1;//2.2 (FOR 300);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
   ki = 0.1;//0//0//.11;//0.8;
-  kd = 0.1;//0.2//0//0.1;
+  kd = 0.8;//0.2//0//0.1;
 
   error = M1Ticks - M2Ticks;
   integral += error;
@@ -308,6 +329,11 @@ double computePID10CM() {
 
 void rotate(int degree) {
   while (degree > 0) {
+    if(degree-45 == 0) {
+      rotate(45, Rotate_45deg);
+      degree -= 45;
+      continue;
+    }
     if(degree <= 90) {
       rotate(90, Rotate_90deg); 
       degree -= 90;
@@ -348,13 +374,14 @@ int computePID_right(int angle){
 
 //Battery A:
   //6.03V p = 2.4 
-  //6.13V p = 1.8 
+  //6.13V p = 1.8
+  //6.3V p = 2.87 / i = 1
 //Battery B:
   //6.27V+ p = 1.8
   //6.24V p = 1.7 
   //6.26V p = 1.73
 
-  kp = 2.9;// (FOR 360);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
+  kp = 2.87;// (FOR 360);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
   ki = 1;//.11;//0.8;
   kd = 0;//0.1;
 
@@ -401,14 +428,15 @@ int computePID_right(int angle){
     
     while (forwardCount < forwardGrid) {
       readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
-      if(DEBUG_MOVE) Serial.println("------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
+      if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
       
       if (faced == 1 && oL > 0) {
         rotate(270); //Turn left
         faced = faced == 1 ? 0 : 3;
+        move(3);
         move(1);
-        forwardCount+=2;
-		if(DEBUG_MOVE) Serial.println("1 Cur Left Face: Rotate Left & Move 2");
+        forwardCount+=4;
+		if(DEBUG_MOVE) Serial.println("1 Cur Right Face: Rotate Left & Move 4");
       } else if (faced == 0 && horizonCount > 0 && oL > 0) {
         rotate(270); //Turn left
         faced = faced == 1 ? 0 : 3;
@@ -416,9 +444,9 @@ int computePID_right(int angle){
         horizonCount = horizonCount - 2;
 		if(DEBUG_MOVE) Serial.println("2 Cur Front Face: Rotate Left & Move 2");
       } else if(faced == 0 && oF > 0) {
-        move(oF);
-        forwardCount+=oF;
-		if(DEBUG_MOVE) Serial.println("6 Cur Front Face: Move 1" + String(oF));
+        move(1);
+        forwardCount+=1;
+		if(DEBUG_MOVE) Serial.println("6 Cur Front Face: Move " + String(1));
       } else if (faced == 3 && horizonCount == 0) {
         rotate(90);
         faced = 0;
@@ -458,6 +486,15 @@ int computePID_right(int angle){
   const char dir = 'l';//'f';//'r';//
   const int NB_SAMPLE = 25;
   int ir_val[NB_SAMPLE];
+
+  void detect() {
+    int oF, oL, oR;
+    while(1){
+      
+      readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
+      if(DEBUG_MOVE) Serial.println("------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
+    }
+  }
   
   void readObstacle(int *oF, int *oL, int *oR) {
 
@@ -469,28 +506,40 @@ int computePID_right(int angle){
         *oF = 0; //Turn
         if(DEBUG_SENSOR) Serial.println("F1");
       } else if (dFM > 10) {
-         dFL = irDistance(1);
+        dFL = irDistance(1);
         if(DEBUG_SENSOR) Serial.println("F2");
-         if(dFL < 10) {
-           *oF = 0; //Turn
-        if(DEBUG_SENSOR) Serial.println("F3");
-         } else {
-           dFR = irDistance(3);
-        if(DEBUG_SENSOR) Serial.println("F4");
-           if(dFR < 10) {
-             *oF = 0; //Turn
-        if(DEBUG_SENSOR) Serial.println("F5");
-           }
-         }
-         if (dFM < 20 || dFL < 20 || dFR < 20) {
-          *oF = 1; //Move 1 unit
-            if(DEBUG_SENSOR) Serial.println("F6");
-        } else if (dFM < 30 || dFL < 30 || dFR < 30) {
-          *oF = 2; //Move 2 unit
-            if(DEBUG_SENSOR) Serial.println("F7");
+        if(dFL < 10) {
+          *oF = 0; //Turn
+          if(DEBUG_SENSOR) Serial.println("F3");
         } else {
-          *oF = 3; //Move 3 unit
+          dFR = irDistance(3);
+          if(DEBUG_SENSOR) Serial.println("F4");
+          
+          if(dFR < 10) {
+            *oF = 0; //Turn
+            if(DEBUG_SENSOR) Serial.println("F5");
+          }
+          
+          if (dFM < 20 || dFL < 22 || dFR < 20) {
+            *oF = 1; //Move 1 unit
+            if(DEBUG_SENSOR) Serial.println("F6");
+          } else if (dFM < 33 || dFL < 36 || dFR < 30) {
+            *oF = 2; //Move 2 unit
+            if(DEBUG_SENSOR) Serial.println("F7");
+          } else {
+            *oF = 3;
             if(DEBUG_SENSOR) Serial.println("F8");
+          }
+          /* else if (dFM < 43 || dFL < 50 || dFR < 30) {
+            *oF = 3; //Move 3 unit
+            if(DEBUG_SENSOR) Serial.println("F8");
+          } else if (dFM < 54 || dFL < 69 || dFR < 40) {
+            *oF = 4; //Move 3 unit
+            if(DEBUG_SENSOR) Serial.println("F9");
+          } else if (dFM < 70 || dFL < 68 || dFR < 50) {
+            *oF = 5; //Move 3 unit
+            if(DEBUG_SENSOR) Serial.println("F10");
+          }*/
         }
       }
     }
@@ -529,22 +578,32 @@ int computePID_right(int angle){
       if(dR < 20) {
         *oR = 0;
         if(DEBUG_SENSOR) Serial.println("R1");
-      } else if (dR < 30) {
+      } else if (dR < 25) {
         *oR = 1;
         if(DEBUG_SENSOR) Serial.println("R2");
-      } else if (dR < 40) {
+      } else if (dR < 33) {
         *oR = 2;
         if(DEBUG_SENSOR) Serial.println("R3");
-      } else if (dR < 50) {
+      } else if (dR < 45) {
         *oR = 3;
         if(DEBUG_SENSOR) Serial.println("R4");
-      } else if (dR < 60) {
+      } else if (dR < 58) {
         *oR = 4;
         if(DEBUG_SENSOR) Serial.println("R5");
       } else {
         *oR = 5;
         if(DEBUG_SENSOR) Serial.println("R6");
       }
+      /*else if (dR < 69) {
+        *oR = 5;
+        if(DEBUG_SENSOR) Serial.println("R6");
+      } else if (dR < 85) {
+        *oR = 6;
+        if(DEBUG_SENSOR) Serial.println("R5");
+      } else if (dR < 99) {
+        *oR = 7;
+        if(DEBUG_SENSOR) Serial.println("R5");
+      }*/
     }
   }
 
