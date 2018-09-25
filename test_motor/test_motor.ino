@@ -21,7 +21,8 @@ const int M2B = 13;
 volatile long M1Ticks, M2Ticks;
 long PrevTicks;
 const int MSpeed = 250;
-const int MSpeedR = 200;
+const int MSpeedR = 150;
+const int offset = -18; //M1 Speed offset (Going abt 20pwm faster)
 bool activate = true;
 char commands;
 
@@ -31,20 +32,21 @@ const int Distance_30CM = Distance_10CM * 3.23;
 const int d180 = 4750;//5004;//2500;//
 const int d180_stop = 5004;
 
-const int Rotate_45deg = 175;
-const int Rotate_90deg = 357;
+/*
+const int Rotate_45deg = 185;
+const int Rotate_90deg = 385;//357;
 const int Rotate_180deg = Rotate_90deg * 2.18;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
+*/
 
-/*
 //For paper testing
 const int Rotate_45deg = 178;
-const int Rotate_90deg = 374;
+const int Rotate_90deg = 395; //374
 const int Rotate_180deg = Rotate_90deg * 2.1105;
 const int Rotate_270deg = Rotate_90deg * 3.19;
 const int Rotate_360deg = Rotate_90deg * 4.28;
-*/
+
 const boolean DEBUG_MOTO = true;
 const boolean DEBUG_MOVE = true;
 const boolean DEBUG_SENSOR = true;
@@ -55,7 +57,7 @@ DualVNH5019MotorShield md;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(19200);
   if(DEBUG_MOTO) Serial.println("Motor Test");
   enableInterrupt(M1A, encoder1, RISING);
   enableInterrupt(M2A, encoder2, RISING);
@@ -70,29 +72,41 @@ void setup() {
   analogReference(DEFAULT);
 }
 
+boolean newBat = false;
+int testing = 5;
 void loop() {
   // put your main code here, to run repeatedly:
-//  moveFront(d180); //moveReverse(d180);
-//  moveFront(Distance_10CM);
-//  moveFront10CM(); delay(1000);
-//  moveFront20CM(); delay(1000);
-//  moveFront30CM(); delay(1000);
-//  rotate(0, Rotate_90deg); delay(1000);
-//  rotate(0, Rotate_180deg); delay(1000);
-//  rotate(0, Rotate_270deg); delay(1000);
-//  rotate(0, Rotate_360deg); delay(1000);
-  moveFront(d180); delay(100);
-//  rotate(180);
-//  moveFront(d180); delay(100);
-//  move(3);// delay(100);
-//  move(3);// delay(100);
-//  move(3); //delay(100);
-//  rotate(180);
-//  move(1); delay(100);
-//  move(2); //delay(100);
-//  detect();
-//  detectAndMove();
-//  rotate(1080);
+  
+  if(newBat) {
+    moveFront(d180); moveReverse(d180); moveFront(d180); moveReverse(d180); moveFront(d180); moveReverse(d180); moveFront(d180); moveReverse(d180); moveFront(d180); moveReverse(d180); moveFront(d180); moveReverse(d180);
+  }
+  
+  if(testing == 1)
+    move(1); 
+  else if (testing == 2)
+    move(2); //delay(100);
+  else if (testing == 3)
+    move(3);
+  else if (testing == 18)
+    moveFront(d180);
+  else if(testing == -1)
+    detectAndMove(true);
+  else if (testing == 90)
+    rotate(90);
+  else if (testing == 180)
+    rotate(180);
+  else if (testing == 270)
+    rotate(270);
+  else if (testing == 360)
+    rotate(360);
+  else if(testing == 5) {
+    rotate(90); delay(1000);
+    rotate(90); delay(1000);
+    rotate(90); delay(1000);
+    rotate(90); delay(1000);
+  } else if (testing > 720)
+    rotate(testing);
+    
   delay(100);
   while(activate){
     while (Serial.available() > 0){
@@ -101,7 +115,7 @@ void loop() {
       switch(commands){
       case 'w': moveFront10CM(); break;
       case 's': moveReverse(Distance_10CM); break;
-      case 'r': rotate(90, Rotate_90deg); break;
+      case 'r': rotate(90); break;
       case 'f': activate = false; break;
       default: break;
       }
@@ -139,7 +153,7 @@ void moveFront(double distance){
   
   for(int i = 0; i < MSpeed; i+= 50) {
     pid = computePID();
-    M1setSpeed = -(i - pid);
+    M1setSpeed = -(i + offset - pid);
     M2setSpeed = -(i + pid);
     md.setSpeeds (M1setSpeed,M2setSpeed);
     if(DEBUG_MOTO) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
@@ -148,7 +162,7 @@ void moveFront(double distance){
 
   while (M1Ticks < distance) {
     pid = computePID();
-    M1setSpeed = -(MSpeed - pid);
+    M1setSpeed = -(MSpeed + offset - pid);
     M2setSpeed = -(MSpeed + pid);
     md.setSpeeds (M1setSpeed,M2setSpeed);
     if(DEBUG_MOTO) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
@@ -157,7 +171,7 @@ void moveFront(double distance){
   
   for(int i=50; (abs(M1setSpeed) > 100); i+=50) {
     pid = computePID();
-    M1setSpeed = -(MSpeed - pid - i);
+    M1setSpeed = -(MSpeed + offset - pid - i);
     M2setSpeed = -(MSpeed + pid - i);
     md.setSpeeds (M1setSpeed,M2setSpeed);
     if(DEBUG_MOTO) Serial.println("Decrement - M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
@@ -201,7 +215,7 @@ double computePID() {
 
   kp = 1.8;//2.4//2.1;//2.2 (FOR 300);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
   ki = 0.1;//0//0//.11;//0.8;
-  kd = 0.8;//0.2//0//0.1;
+  kd = 0.1;//0.2//0//0.1;
 
   error = M1Ticks - M2Ticks;
   integral += error;
@@ -327,41 +341,66 @@ double computePID10CM() {
  * ----------------------------------------------------------------------------------------------------------------------------------------------------------------
  */
 
-void rotate(int degree) {
+void rotate(int degree, boolean isRight) {
   while (degree > 0) {
     if(degree-45 == 0) {
-      rotate(45, Rotate_45deg);
+      rotate(45, Rotate_45deg, isRight);
       degree -= 45;
       continue;
     }
     if(degree <= 90) {
-      rotate(90, Rotate_90deg); 
+      rotate(90, Rotate_90deg, isRight); 
       degree -= 90;
     } else if(degree <= 180) {
-      rotate(180, Rotate_180deg);
+      rotate(180, Rotate_180deg, isRight);
       degree -= 180;
     } else if (degree <= 270) {
-      rotate(270, Rotate_270deg);
+      rotate(270, Rotate_270deg, isRight);
       degree -= 270;
     } else if (degree >= 360) {
-      rotate(360, Rotate_360deg);
+      rotate(360, Rotate_360deg, isRight);
       degree -= 360;
     }
     delay (100);
   }
 }
 
-void rotate(int degree, double distance) {
+void rotate(int degree) {
+  rotateR(degree);
+}
+
+void rotateR(int degree) {
+  rotate(degree, true);
+}
+
+void rotateL(int degree) {
+  rotate(degree, false);
+}
+
+void rotate(int degree, double distance, boolean isRight) {
   double pid;
+  integral = 0;
   M1Ticks = 0;
   M2Ticks = 0;
 
-  while (M1Ticks < distance) {
-    pid = computePID_right(degree);
-    int M1setSpeed = -(MSpeedR - pid);
-    int M2setSpeed = (MSpeedR + pid);
-    md.setSpeeds (M1setSpeed,M2setSpeed);
-//    if(DEBUG_MOTO) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+  if(isRight) {
+    while (M1Ticks < distance) {
+      pid = computePID_right(degree);
+      int M1setSpeed = -(MSpeedR);
+      int M2setSpeed = (MSpeedR + pid);
+      md.setSpeeds (M1setSpeed,M2setSpeed);
+      if(DEBUG_MOTO) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+      if(DEBUG_MOTO) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks-M2Ticks));
+    }
+  } else {
+    while (M1Ticks < distance) {
+      pid = computePID_right(degree);
+      int M1setSpeed = (MSpeedR);
+      int M2setSpeed = -(MSpeedR + pid);
+      md.setSpeeds (M1setSpeed,M2setSpeed);
+      if(DEBUG_MOTO) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+      if(DEBUG_MOTO) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks-M2Ticks));
+    }
   }
   brake();
   delay(100);
@@ -369,8 +408,8 @@ void rotate(int degree, double distance) {
 
 int computePID_right(int angle){
   
-  if(DEBUG_MOTO) Serial.println("[PID] M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks-M2Ticks));
-  double kp, ki, kd, p, i, d, pid, error, integral;
+//  if(DEBUG_MOTO) Serial.println("[PID] M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks-M2Ticks));
+  double kp, ki, kd, p, i, d, pid, error;
 
 //Battery A:
   //6.03V p = 2.4 
@@ -380,9 +419,15 @@ int computePID_right(int angle){
   //6.27V+ p = 1.8
   //6.24V p = 1.7 
   //6.26V p = 1.73
-
-  kp = 2.87;// (FOR 360);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
-  ki = 1;//.11;//0.8;
+  
+//After removing serial print
+//Battery A
+  // 6.18V p = 10; i = 0.1; 12 (unstable state)
+//Battery B
+  // 6.23V p = 8; 10 (unstable state)
+  
+  kp = 10;// (FOR 360);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
+  ki = 0.1;//.11;//0.8;
   kd = 0;//0.1;
 
   error = M1Ticks - M2Ticks;
@@ -392,8 +437,8 @@ int computePID_right(int angle){
   d = kd * (error - PrevTicks);
   pid = p + i + d;
   PrevTicks = error;
-  if(DEBUG_MOTO) Serial.print("PID: ");
-  if(DEBUG_MOTO) Serial.println(pid);
+//  if(DEBUG_MOTO) Serial.print("PID: ");
+//  if(DEBUG_MOTO) Serial.println(pid);
   
   return pid;
 }
@@ -421,7 +466,7 @@ int computePID_right(int angle){
   int oF, oL, oR;
   
   
-  void detectAndMove() {
+  void detectAndMove(boolean is90) {
     int forwardCount = 0;
     int horizonCount = 0;
     int faced = 0; // 0 = North, 1 = East, 2 = South, 3 = West
@@ -431,14 +476,14 @@ int computePID_right(int angle){
       if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
       
       if (faced == 1 && oL > 0) {
-        rotate(270); //Turn left
+        rotateL(90);//rotate(270); //Turn left
         faced = faced == 1 ? 0 : 3;
         move(3);
         move(1);
         forwardCount+=4;
 		if(DEBUG_MOVE) Serial.println("1 Cur Right Face: Rotate Left & Move 4");
       } else if (faced == 0 && horizonCount > 0 && oL > 0) {
-        rotate(270); //Turn left
+        rotateL(90);//rotate(270); //Turn left
         faced = faced == 1 ? 0 : 3;
         move(2);
         horizonCount = horizonCount - 2;
@@ -446,23 +491,23 @@ int computePID_right(int angle){
       } else if(faced == 0 && oF > 0) {
         move(1);
         forwardCount+=1;
-		if(DEBUG_MOVE) Serial.println("6 Cur Front Face: Move " + String(1));
+		if(DEBUG_MOVE) Serial.println("3 Cur Front Face: Move " + String(1));
       } else if (faced == 3 && horizonCount == 0) {
         rotate(90);
         faced = 0;
         move(1);
         forwardCount+=1;
-		if(DEBUG_MOVE) Serial.println("3 Cur Right Face: Rotate Right & Move 1");
+		if(DEBUG_MOVE) Serial.println("4 Cur Right Face: Rotate Right & Move 1");
       } else if(faced != 0 && oF > 0) {
         move(1); //Move forward to avoid obstacle
         horizonCount = faced == 1 ? (horizonCount + 1) : faced == 3 ? (horizonCount - 1) : horizonCount;
-		if(DEBUG_MOVE) Serial.println("4 Cur Left/Right Face: Move 1");
+		if(DEBUG_MOVE) Serial.println("5 Cur Left/Right Face: Move 1");
       } else if (faced != 0 && oF == 0) {
         rotate(90);
         faced = 1;
         move(2);
         horizonCount = horizonCount + 2;
-		if(DEBUG_MOVE) Serial.println("5 Cur Left/Right Face: Rotate Right & Move 2");
+		if(DEBUG_MOVE) Serial.println("6 Cur Left/Right Face: Rotate Right & Move 2");
       } else if (oF == 0) {
         rotate(90);
         faced = 1;
