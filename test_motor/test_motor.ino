@@ -32,20 +32,22 @@ const int Distance_30CM = Distance_10CM * 3.23;
 const int d180 = 4750;//5004;//2500;//
 const int d180_stop = 5004;
 
-/*
 const int Rotate_45deg = 185;
 const int Rotate_90deg = 385;//357;
-const int Rotate_180deg = Rotate_90deg * 2.18;
+const int Rotate_180deg = Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
-*/
 
+/*
 //For paper testing
 const int Rotate_45deg = 178;
-const int Rotate_90deg = 395; //374
-const int Rotate_180deg = Rotate_90deg * 2.1105;
-const int Rotate_270deg = Rotate_90deg * 3.19;
-const int Rotate_360deg = Rotate_90deg * 4.28;
+const int Rotate_90deg = 393; //374
+const int Rotate_180deg = Rotate_90deg * 2.04;//2.1105;
+const int Rotate_270deg = Rotate_90deg * 3.083;
+const int Rotate_360deg = Rotate_90deg * 4.113;*/
+const int Rotate_720deg = 3243;
+const int Rotate_900deg = 4070;
+const int Rotate_1080deg = 4870;
 
 const boolean DEBUG_MOTO = true;
 const boolean DEBUG_MOVE = true;
@@ -73,7 +75,9 @@ void setup() {
 }
 
 boolean newBat = false;
-int testing = 5;
+
+int testing = 180;
+
 void loop() {
   // put your main code here, to run repeatedly:
   
@@ -104,11 +108,12 @@ void loop() {
     rotate(90); delay(1000);
     rotate(90); delay(1000);
     rotate(90); delay(1000);
-  } else if (testing > 720)
+  } else if (testing >= 720)
     rotate(testing);
     
   delay(100);
   while(activate){
+//    detect();
     while (Serial.available() > 0){
       commands = Serial.read();
       delay(100);
@@ -146,6 +151,7 @@ void brake(){
 void moveFront(double distance){
   double pid;
   integral = 0;
+  PrevTicks = 0;
   M1Ticks = 0;
   M2Ticks = 0;
   
@@ -185,6 +191,7 @@ void moveFront(double distance){
 void moveReverse(double distance){
   double pid;
   integral = 0;
+  PrevTicks = 0;
   M1Ticks = 0;
   M2Ticks = 0;
 
@@ -269,6 +276,7 @@ void moveFront30CM() {
 void moveFrontShort(int distance){
   double pid;
   integral = 0;
+  PrevTicks = 0;
   M1Ticks = 0;
   M2Ticks = 0;
   
@@ -357,9 +365,18 @@ void rotate(int degree, boolean isRight) {
     } else if (degree <= 270) {
       rotate(270, Rotate_270deg, isRight);
       degree -= 270;
-    } else if (degree >= 360) {
+    } else if (degree <= 360) {
       rotate(360, Rotate_360deg, isRight);
       degree -= 360;
+    } else if (degree <= 720) {
+      rotate(720, Rotate_720deg, isRight);
+      degree -= 720;
+    } else if (degree <= 900) {
+      rotate(900, Rotate_900deg, isRight);
+      degree -= 900;
+    } else {
+      rotate(1080, Rotate_1080deg, isRight);
+      degree -= 1080;
     }
     delay (100);
   }
@@ -380,6 +397,7 @@ void rotateL(int degree) {
 void rotate(int degree, double distance, boolean isRight) {
   double pid;
   integral = 0;
+  PrevTicks = 0;
   M1Ticks = 0;
   M2Ticks = 0;
 
@@ -473,7 +491,7 @@ int computePID_right(int angle){
     
     while (forwardCount < forwardGrid) {
       readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
-      if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
+      if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
       
       if (faced == 1 && oL > 0) {
         rotateL(90);//rotate(270); //Turn left
@@ -537,7 +555,7 @@ int computePID_right(int angle){
     while(1){
       
       readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
-      if(DEBUG_MOVE) Serial.println("------------------------------" + String(oF) + " | " + String(oL) + " | " + String(oR));
+      if(DEBUG_MOVE) Serial.println("------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
     }
   }
   
@@ -660,8 +678,8 @@ int computePID_right(int angle){
 //  ir_val = mergeSort(ir_val,0,NB_SAMPLE-1);
     mergeSort(ir_val,0,NB_SAMPLE-1);
     
-    //Return in CM
-    int result = sensor == 4 ? 60.374 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.16) : 27.728 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.2045);
+    //Return in MM
+    int result = sensor == 4 ? 603.74 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.16) : 277.28 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.2045);
     if(DEBUG_SENSOR) Serial.println(String(sensor) + " | " + String(ir_val[NB_SAMPLE/2]) + " | " + String(result) + " | " + "------------------------");
     return result;
     //Return in mV
