@@ -38,13 +38,13 @@ const int Rotate_180deg = Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
 
-/*
-//For paper testing
-const int Rotate_45deg = 178;
-const int Rotate_90deg = 393; //374
-const int Rotate_180deg = Rotate_90deg * 2.04;//2.1105;
-const int Rotate_270deg = Rotate_90deg * 3.083;
-const int Rotate_360deg = Rotate_90deg * 4.113;*/
+
+////For paper testing
+//const int Rotate_45deg = 178;
+//const int Rotate_90deg = 393; //374
+//const int Rotate_180deg = Rotate_90deg * 2.04;//2.1105;
+//const int Rotate_270deg = Rotate_90deg * 3.083;
+//const int Rotate_360deg = Rotate_90deg * 4.113;
 const int Rotate_720deg = 3243;
 const int Rotate_900deg = 4070;
 const int Rotate_1080deg = 4870;
@@ -59,7 +59,7 @@ DualVNH5019MotorShield md;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(19200);
+  Serial.begin(115200);//(19200);
   if(DEBUG_MOTO) Serial.println("Motor Test");
   enableInterrupt(M1A, encoder1, RISING);
   enableInterrupt(M2A, encoder2, RISING);
@@ -76,7 +76,7 @@ void setup() {
 
 boolean newBat = false;
 
-int testing = 180;
+int testing = 1;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -94,7 +94,7 @@ void loop() {
   else if (testing == 18)
     moveFront(d180);
   else if(testing == -1)
-    detectAndMove(true);
+    detectAndMove(false);
   else if (testing == 90)
     rotate(90);
   else if (testing == 180)
@@ -108,12 +108,14 @@ void loop() {
     rotate(90); delay(1000);
     rotate(90); delay(1000);
     rotate(90); delay(1000);
-  } else if (testing >= 720)
+  } else if (testing >= 720) {
     rotate(testing);
+  } else if (testing == 0) {
+    detectAll();
+  }
     
   delay(100);
   while(activate){
-//    detect();
     while (Serial.available() > 0){
       commands = Serial.read();
       delay(100);
@@ -482,56 +484,201 @@ int computePID_right(int angle){
 
   const int forwardGrid = 15;
   int oF, oL, oR;
-  
+  int oFL, oFM, oFR, oLF, oLB;  
   
   void detectAndMove(boolean is90) {
     int forwardCount = 0;
     int horizonCount = 0;
     int faced = 0; // 0 = North, 1 = East, 2 = South, 3 = West
+    int prevFaced = 0;
+    boolean newCode = false;
+
+    if (is90) {
     
-    while (forwardCount < forwardGrid) {
-      readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
-      if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
+      if(newCode) {
+        while (forwardCount < forwardGrid) {
+          
+  //        readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
+  //        if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + 
+  //          "------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
+          readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
+          if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + 
+            "\n------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+  
+          oL = min(oLF, oLB);
+          oF = min(oFL, min(oFM, oFR));
+  //Face 1        
+          if (prevFaced == 0 && faced == 1 && oL > 0 && oF > 0) { //Block on immediate left, no sensor to see.
+            move(1);
+            horizonCount = horizonCount + 1;
+          if(DEBUG_MOVE) Serial.println("1");
+          
+          } else if (faced == 1 && oLF == 0 && oF > 0) { // Block on front left
+            move(3);
+            horizonCount = horizonCount + 3;
+          if(DEBUG_MOVE) Serial.println("2");
+            
+          } else if (faced == 1 && oL == 0 && oF > 0) { // Block on back left or any left got block
+            move(1);
+            horizonCount = horizonCount + 1;
+          if(DEBUG_MOVE) Serial.println("3");
+            
+          } else if (faced == 1 && oL > 0 && horizonCount > 0) { // Rotate back to face front
+            rotateL(90);//rotate(270); //Turn left
+            faced = 0;
+          if(DEBUG_MOVE) Serial.println("4");
+  //Prev 1 Face 0        
+          } else if (prevFaced == 1 && faced == 0 && oF > 0) { // Move forward, just cleared from obstacle
+            move(3);
+            forwardCount+=3;
+          if(DEBUG_MOVE) Serial.println("5");
+  //Face 0        
+          } else if (faced == 0 && oF > 0 && oL == 0) { // Move forward, obstacle back left 
+            move(1);
+            forwardCount+=1;
+          if(DEBUG_MOVE) Serial.println("6");
+          
+          } else if (faced == 0 && horizonCount > 0 && oL > 0) { // Rotate to face left
+            rotateL(90);//rotate(270); //Turn left
+            faced = 3;
+          if(DEBUG_MOVE) Serial.println("7");
+  // Face 3        
+          } else if (prevFaced == 0 && faced == 3 && horizonCount > 0 && oF > 0) { // Rotate to face left
+            if(oF < horizonCount) {
+              move(oF);
+              horizonCount = horizonCount - oF;
+            } else {
+              move(horizonCount);
+              horizonCount = 0;
+            }
+          if(DEBUG_MOVE) Serial.println("8");
+          
+          } else if (faced == 3 && horizonCount > 0 && oL == 0 && oF > 0) { // Move left, back to original track
+              move(1);
+              horizonCount = horizonCount - 1;
+          if(DEBUG_MOVE) Serial.println("9");
+          
+          } else if (faced == 3 && horizonCount == 0) { // Rotate right to face forward
+            rotateR(90);
+          if(DEBUG_MOVE) Serial.println("10");
+  // Face 0          
+          } else if(faced != 0 && oF > 0) {
+            move(1); //Move forward to avoid obstacle
+            horizonCount = faced == 1 ? (horizonCount + 1) : faced == 3 ? (horizonCount - 1) : horizonCount;
+          if(DEBUG_MOVE) Serial.println("11");
+          
+          } else if (faced != 0 && oF == 0) {
+            rotate(90);
+            faced = (faced + 1)%4;
+          if(DEBUG_MOVE) Serial.println("12");
+          
+          } else if (oF == 0) {
+            rotate(90);
+            faced = (faced + 1)%4;
+          if(DEBUG_MOVE) Serial.println("13");
+          
+          } else if(faced == 0) {
+            if(oF >= 3) {
+              move(3);
+              forwardCount+=3;
+            } else if(oF > 0) {
+              move(oF);
+              forwardCount+=oF;
+            }
+          if(DEBUG_MOVE) Serial.println("14");
+          }
+          
+          prevFaced = faced;
+        }
+      } else {
+        while (forwardCount < forwardGrid) {
+          readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
+          if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + "------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
+          
+          if (faced == 1 && oL > 0) {
+            rotateL(90);//rotate(270); //Turn left
+            faced = faced == 1 ? 0 : 3;
+            move(3);
+            move(1);
+            forwardCount+=4;
+    		if(DEBUG_MOVE) Serial.println("1 Cur Right Face: Rotate Left & Move 4");
+          } else if (faced == 0 && horizonCount > 0 && oL > 0) {
+            rotateL(90);//rotate(270); //Turn left
+            faced = faced == 1 ? 0 : 3;
+            move(2);
+            horizonCount = horizonCount - 2;
+    		if(DEBUG_MOVE) Serial.println("2 Cur Front Face: Rotate Left & Move 2");
+          } else if(faced == 0 && oF > 0) {
+            move(1);
+            forwardCount+=1;
+    		if(DEBUG_MOVE) Serial.println("3 Cur Front Face: Move " + String(1));
+          } else if (faced == 3 && horizonCount == 0) {
+            rotate(90);
+            faced = 0;
+            move(1);
+            forwardCount+=1;
+    		if(DEBUG_MOVE) Serial.println("4 Cur Right Face: Rotate Right & Move 1");
+          } else if(faced != 0 && oF > 0) {
+            move(1); //Move forward to avoid obstacle
+            horizonCount = faced == 1 ? (horizonCount + 1) : faced == 3 ? (horizonCount - 1) : horizonCount;
+    		if(DEBUG_MOVE) Serial.println("5 Cur Left/Right Face: Move 1");
+          } else if (faced != 0 && oF == 0) {
+            rotate(90);
+            faced = 1;
+            move(2);
+            horizonCount = horizonCount + 2;
+    		if(DEBUG_MOVE) Serial.println("6 Cur Left/Right Face: Rotate Right & Move 2");
+          } else if (oF == 0) {
+            rotate(90);
+            faced = 1;
+            move(2);
+            horizonCount = horizonCount + 2;
+    		if(DEBUG_MOVE) Serial.println("7 Cur ? Face: Rotate Right & Move 2");
+          }
+        }
+      }
+
+// 45 degree      
+    } else {
       
-      if (faced == 1 && oL > 0) {
-        rotateL(90);//rotate(270); //Turn left
-        faced = faced == 1 ? 0 : 3;
-        move(3);
-        move(1);
-        forwardCount+=4;
-		if(DEBUG_MOVE) Serial.println("1 Cur Right Face: Rotate Left & Move 4");
-      } else if (faced == 0 && horizonCount > 0 && oL > 0) {
-        rotateL(90);//rotate(270); //Turn left
-        faced = faced == 1 ? 0 : 3;
-        move(2);
-        horizonCount = horizonCount - 2;
-		if(DEBUG_MOVE) Serial.println("2 Cur Front Face: Rotate Left & Move 2");
-      } else if(faced == 0 && oF > 0) {
-        move(1);
-        forwardCount+=1;
-		if(DEBUG_MOVE) Serial.println("3 Cur Front Face: Move " + String(1));
-      } else if (faced == 3 && horizonCount == 0) {
-        rotate(90);
-        faced = 0;
-        move(1);
-        forwardCount+=1;
-		if(DEBUG_MOVE) Serial.println("4 Cur Right Face: Rotate Right & Move 1");
-      } else if(faced != 0 && oF > 0) {
-        move(1); //Move forward to avoid obstacle
-        horizonCount = faced == 1 ? (horizonCount + 1) : faced == 3 ? (horizonCount - 1) : horizonCount;
-		if(DEBUG_MOVE) Serial.println("5 Cur Left/Right Face: Move 1");
-      } else if (faced != 0 && oF == 0) {
-        rotate(90);
-        faced = 1;
-        move(2);
-        horizonCount = horizonCount + 2;
-		if(DEBUG_MOVE) Serial.println("6 Cur Left/Right Face: Rotate Right & Move 2");
-      } else if (oF == 0) {
-        rotate(90);
-        faced = 1;
-        move(2);
-        horizonCount = horizonCount + 2;
-		if(DEBUG_MOVE) Serial.println("7 Cur ? Face: Rotate Right & Move 2");
+      while (forwardCount < forwardGrid) {
+        
+//        readObstacle(&(oF = 0), &(oL = 0), &(oR = 0));
+//        if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + 
+//          "------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
+        readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
+        if(DEBUG_MOVE) Serial.println("Faced: " + String(faced) + " | " + "Horizon: " + String(horizonCount) + " | " + "Forward: " + String(forwardCount) + 
+          "\n------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+
+        oL = min(oLF, oLB);
+        oF = min(oFL, min(oFM, oFR));
+
+        if /*(faced == 0 && (oFL == 2 || oFR == 2)) {
+          rotate(45);
+          move(3);
+          move(3);
+          move(1);
+          rotateL(90);
+          move(3);
+          move(3);
+          move(1);
+          rotate(45);
+          forwardCount += 8;
+        } else if */(faced == 0 && oF == 1) {
+          rotate(45);
+          move(2);
+          move(2);
+          move(1);
+          rotateL(90);
+          move(2);
+          move(2);
+          move(1);
+          rotate(45);
+          forwardCount += 6;
+        } else if (faced == 0 && (oF > 2 || oFM == 1)) {
+          move(1);
+          forwardCount += 1;
+        }
       }
     }
   }
@@ -547,7 +694,7 @@ int computePID_right(int angle){
  */
 
   const char dir = 'l';//'f';//'r';//
-  const int NB_SAMPLE = 25;
+  const int NB_SAMPLE = 10;
   int ir_val[NB_SAMPLE];
 
   void detect() {
@@ -558,35 +705,67 @@ int computePID_right(int angle){
       if(DEBUG_MOVE) Serial.println("------------------------------F:" + String(oF) + " | L:" + String(oL) + " | R:" + String(oR));
     }
   }
+
+  void detectAll() {
+    int oFL, oFM, oFR, oLF, oFB, oR;
+    int i = 0;
+    while(1) {//i++ < 220){
+      readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
+//      if(DEBUG_MOVE) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+    }
+  }
+
+  const int rFL []PROGMEM = {100, 200, 300};
+  const int rFM []PROGMEM = {100, 200, 300};
+  const int rFR []PROGMEM = {100, 200, 300};
+  const int rLF []PROGMEM = {100, 200, 300};
+  const int rLB []PROGMEM = {100, 200, 300};
+  const int rR  []PROGMEM = {200, 250, 330, 450, 580};
   
+  void readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR) {
+    int dFL = irDistance(1), dFM = irDistance(2), dFR = irDistance(3);
+    int dLF = irDistance(5), dLB = irDistance(6);
+    int dR = irDistance(4);
+    
+    *oFL = dFL < rFL[0] ? 0 : dFL < rFL[1] ? 1 : dFL < rFL[2] ? 2 : 3;
+    *oFM = dFM < rFM[0] ? 0 : dFM < rFM[1] ? 1 : dFM < rFM[2] ? 2 : 3;
+    *oFR = dFR < rFR[0] ? 0 : dFR < rFR[1] ? 1 : dFR < rFR[2] ? 2 : 3;
+    
+    *oLF = dLF < rLF[0] ? 0 : dLF < rLF[1] ? 1 : dLF < rLF[2] ? 2 : 3;
+    *oLB = dLB < rLB[0] ? 0 : dLB < rLB[1] ? 1 : dLB < rLB[2] ? 2 : 3;
+    
+    *oR = dR < rR[0] ? 0 : dR < rR[1] ? 1 : dR < rR[2] ? 2 : dR < rR[3] ? 3 : dR < rR[4] ? 4 : 5;
+    
+    if(DEBUG_SENSOR) Serial.println("");
+  }
   void readObstacle(int *oF, int *oL, int *oR) {
 
 //NEED TO READ THEM ONE BY ONE, ONLY WHEN NEEDED    
     //Detect front sensors
     if(*oF == 0) {
       int dFL, dFM = irDistance(2), dFR;
-      if(dFM < 10) {
+      if(dFM < rFM[0]) {
         *oF = 0; //Turn
         if(DEBUG_SENSOR) Serial.println("F1");
-      } else if (dFM > 10) {
+      } else if (dFM > rFM[0]) {
         dFL = irDistance(1);
         if(DEBUG_SENSOR) Serial.println("F2");
-        if(dFL < 10) {
+        if(dFL < rFL[0]) {
           *oF = 0; //Turn
           if(DEBUG_SENSOR) Serial.println("F3");
         } else {
           dFR = irDistance(3);
           if(DEBUG_SENSOR) Serial.println("F4");
           
-          if(dFR < 10) {
+          if(dFR < rFR[0]) {
             *oF = 0; //Turn
             if(DEBUG_SENSOR) Serial.println("F5");
           }
           
-          if (dFM < 20 || dFL < 22 || dFR < 20) {
+          if (dFM < rFM[1] || dFL < rFL[1] || dFR < rFR[1]) {
             *oF = 1; //Move 1 unit
             if(DEBUG_SENSOR) Serial.println("F6");
-          } else if (dFM < 33 || dFL < 36 || dFR < 30) {
+          } else if (dFM < rFM[2] || dFL < rFL[2] || dFR < rFR[2]) {
             *oF = 2; //Move 2 unit
             if(DEBUG_SENSOR) Serial.println("F7");
           } else {
@@ -607,25 +786,26 @@ int computePID_right(int angle){
       }
     }
     
+    
 //    else if (*oL == 0) {      
     if (*oL == 0) {      
       //Detect left sensors
       int dLF = irDistance(5), dLB;
-      if(dLF < 10) {
+      if(dLF < rLF[0]) {
         *oL = 0;
         if(DEBUG_SENSOR) Serial.println("L1");
-      } else if (dLF > 10) {
+      } else if (dLF > rLF[0]) {
         dLB = irDistance(6);
         if(DEBUG_SENSOR) Serial.println("L2");
-        if(dLB < 10) {
+        if(dLB < rLB[0]) {
           *oL = 0;
         if(DEBUG_SENSOR) Serial.println("L3");
         }
         
-        if (dLF < 20 || dLB < 20) {
+        if (dLF < rLF[1] || dLB < rLB[1]) {
           *oL = 1;
           if(DEBUG_SENSOR) Serial.println("L4");
-        } else if (dLF < 30 || dLB < 30) {
+        } else if (dLF < rLF[2] || dLB < rLB[2]) {
           *oL = 2;
           if(DEBUG_SENSOR) Serial.println("L5");
         } else {
@@ -638,19 +818,19 @@ int computePID_right(int angle){
 //    else if (*oR == 0) {
     if (*oR == 0) {
       int dR = irDistance(4);
-      if(dR < 20) {
+      if(dR < rR[0]) {
         *oR = 0;
         if(DEBUG_SENSOR) Serial.println("R1");
-      } else if (dR < 25) {
+      } else if (dR < rR[1]) {
         *oR = 1;
         if(DEBUG_SENSOR) Serial.println("R2");
-      } else if (dR < 33) {
+      } else if (dR < rR[2]) {
         *oR = 2;
         if(DEBUG_SENSOR) Serial.println("R3");
-      } else if (dR < 45) {
+      } else if (dR < rR[3]) {
         *oR = 3;
         if(DEBUG_SENSOR) Serial.println("R4");
-      } else if (dR < 58) {
+      } else if (dR < rR[4]) {
         *oR = 4;
         if(DEBUG_SENSOR) Serial.println("R5");
       } else {
@@ -680,7 +860,7 @@ int computePID_right(int angle){
     
     //Return in MM
     int result = sensor == 4 ? 603.74 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.16) : 277.28 * pow(map(ir_val[NB_SAMPLE/2], 0, 1023, 0, 5000)/1000.0, -1.2045);
-    if(DEBUG_SENSOR) Serial.println(String(sensor) + " | " + String(ir_val[NB_SAMPLE/2]) + " | " + String(result) + " | " + "------------------------");
+    if(DEBUG_SENSOR) Serial.print(" | " + String(sensor) + " | " + String(ir_val[NB_SAMPLE/2]) + " | " + String(result));
     return result;
     //Return in mV
 //    return ir_val[NB_SAMPLE/2];
