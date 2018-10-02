@@ -51,9 +51,9 @@ const int Rotate_720deg = 3243;
 const int Rotate_900deg = 4070;
 const int Rotate_1080deg = 4870;
 
-const boolean DEBUG_MOTO = true;
-const boolean DEBUG_MOVE = true;
-const boolean DEBUG_SENSOR = true;
+const boolean DEBUG_MOTO = false;
+const boolean DEBUG_MOVE = false;
+const boolean DEBUG_SENSOR = false;
 
 double integral;
 
@@ -78,7 +78,7 @@ void setup() {
 
 boolean newBat = false;
 
-int testing = 0;
+int testing = 1;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -101,8 +101,8 @@ void loop() {
   else if (testing == 18)
     moveFront(d180);
   else if (testing == -1) {
-//    detectAndMove(true);
-//    rotate(180);
+    //    detectAndMove(true);
+    //    rotate(180);
     detectAndMove(false);
   } else if (testing == 45)
     rotate(45);
@@ -125,7 +125,7 @@ void loop() {
   } else if (testing == 7) {
     moveFront5CM();
   } else if (testing == -5) {
-  
+
     rotateL(90); delay(1000);
     rotateL(90); delay(1000);
     rotateL(90); delay(1000);
@@ -151,6 +151,7 @@ void loop() {
         case 'f': activate = false; break;
         default: break;
       }
+      Serial.print("a" + String(commands));
     }
   }
   while (!activate) {
@@ -358,8 +359,8 @@ void moveFrontShort(int distance) {
 }
 
 
-  double computePID10CM() {
-  if(DEBUG_MOTO) Serial.println("[PID] M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks-M2Ticks));
+double computePID10CM() {
+  if (DEBUG_MOTO) Serial.println("[PID] M1Ticks(" + String(M1Ticks) + ") - M2Ticks(" + String(M2Ticks) + ") = " + String(M1Ticks - M2Ticks));
   double kp, ki, kd, p, i, d, pid, error;
 
   //6.03V p = 2.4 / i = 0.1 / d = 0.2
@@ -382,7 +383,7 @@ void moveFrontShort(int distance) {
   if (DEBUG_MOTO) Serial.println(integral);
 
   return pid;
-  }
+}
 
 /* ================================================================================================================================================================
    END OF FORWARD SHORT
@@ -712,16 +713,16 @@ void detectAndMove(boolean is90) {
           rotate(45);
           forwardCount += 8;
         } else if */(faced == 0 && oF == 1) {
-          
+
         moveFront5CM();
         rotate(45);
         move(2);
         move(2);
-//        moveFront5CM();
+        //        moveFront5CM();
         rotateL(90);
         move(2);
         move(2);
-//        moveFront5CM();
+        //        moveFront5CM();
         rotate(45);
         forwardCount += 6;
       } else if (faced == 0 && (oF > 2 || oFM == 1)) {
@@ -758,9 +759,9 @@ void detect() {
 void detectAll() {
   int oFL, oFM, oFR, oLF, oFB, oR;
   int i = 0;
-  while (i++ < 2200){
+  while (i++ < 2200) {
     readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
-//    if (DEBUG_MOVE) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+    //    if (DEBUG_MOVE) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
   }
 }
 
