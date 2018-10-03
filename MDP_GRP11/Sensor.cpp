@@ -32,14 +32,53 @@ void Sensor::readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int 
   int dLF = irDistance(5), dLB = irDistance(6);
   int dR = irDistance(4);
 
-  *oFL = dFL < rFL[0] ? 0 : dFL < rFL[1] ? 1 : dFL < rFL[2] ? 2 : dFL < rFL[3] ? 3 : 9;
-  *oFM = dFM < rFM[0] ? 0 : dFM < rFM[1] ? 1 : dFM < rFM[2] ? 2 : dFM < rFM[3] ? 3 : 9;
-  *oFR = dFR < rFR[0] ? 0 : dFR < rFR[1] ? 1 : dFR < rFR[2] ? 2 : dFR < rFR[3] ? 3 : 9;
+  *oFL = dFL < sFL[0] ? gShort[0] : dFL < sFL[1] ? gShort[1] : dFL < sFL[2] ? gShort[2] : dFL < sFL[3] ? gShort[3] : gShort[4];
+  *oFM = dFM < sFM[0] ? gShort[0] : dFM < sFM[1] ? gShort[1] : dFM < sFM[2] ? gShort[2] : dFM < sFM[3] ? gShort[3] : gShort[4];
+  *oFR = dFR < sFR[0] ? gShort[0] : dFR < sFR[1] ? gShort[1] : dFR < sFR[2] ? gShort[2] : dFR < sFR[3] ? gShort[3] : gShort[4];
 
-  *oLF = dLF < rLF[0] ? 0 : dLF < rLF[1] ? 1 : dLF < rLF[2] ? 2 : dLF < rLF[3] ? 3 : 9;
-  *oLB = dLB < rLB[0] ? 0 : dLB < rLB[1] ? 1 : dLB < rLB[2] ? 2 : dLB < rLB[3] ? 3 : 9;
+  *oLF = dLF < sLF[0] ? gShort[0] : dLF < sLF[1] ? gShort[1] : dLF < sLF[2] ? gShort[2] : dLF < sLF[3] ? gShort[3] : gShort[4];
+  *oLB = dLB < sLB[0] ? gShort[0] : dLB < sLB[1] ? gShort[1] : dLB < sLB[2] ? gShort[2] : dLB < sLB[3] ? gShort[3] : gShort[4];
 
-  *oR = dR < rR[0] ? 0 : dR < rR[1] ? 1 : dR < rR[2] ? 2 : dR < rR[3] ? 3 : dR < rR[4] ? 4 : dR < rR[5] ? 5 : 9;
+  *oR = dR < sR[0] ? gLong[0] : dR < sR[1] ? gLong[1] : dR < sR[2] ? gLong[2] : dR < sR[3] ? gLong[3] : dR < sR[4] ? gLong[4] : dR < sR[5] ? gLong[5] : gLong[6];
+}
+
+void Sensor::readSensor(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR) {
+  *oFL = irDistance(1);
+  *oFM = irDistance(2);
+  *oFR = irDistance(3);
+
+  *oLF = irDistance(5);
+  *oLB = irDistance(6);
+
+  *oR = irDistance(4);
+}
+
+bool Sensor::hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rLB, int *rR) {
+
+  int oFL = *rFL < sFL[0] ? 0 : *rFL < sFL[1] ? 1 : *rFL < sFL[2] ? 2 : *rFL < sFL[3] ? 3 : 9;
+  int oFM = *rFM < sFM[0] ? 0 : *rFM < sFM[1] ? 1 : *rFM < sFM[2] ? 2 : *rFM < sFM[3] ? 3 : 9;
+  int oFR = *rFR < sFR[0] ? 0 : *rFR < sFR[1] ? 1 : *rFR < sFR[2] ? 2 : *rFR < sFR[3] ? 3 : 9;
+
+  int oLF = *rLF < sLF[0] ? 0 : *rLF < sLF[1] ? 1 : *rLF < sLF[2] ? 2 : *rLF < sLF[3] ? 3 : 9;
+  int oLB = *rLB < sLB[0] ? 0 : *rLB < sLB[1] ? 1 : *rLB < sLB[2] ? 2 : *rLB < sLB[3] ? 3 : 9;
+
+  int oR = *rR < sR[0] ? 0 : *rR < sR[1] ? 1 : *rR < sR[2] ? 2 : *rR < sR[3] ? 3 : *rR < sR[4] ? 4 : *rR < sR[5] ? 5 : 9;
+
+  if ((oFL == 0 || oFM == 0 || oFR == 0) && (oLF == 0 && oLB == 0))
+    return true;
+
+  return false;
+}
+
+bool Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
+
+  int oLF = *rLF < sLF[0] ? 0 : *rLF < sLF[1] ? 1 : *rLF < sLF[2] ? 2 : *rLF < sLF[3] ? 3 : 9;
+  int oLB = *rLB < sLB[0] ? 0 : *rLB < sLB[1] ? 1 : *rLB < sLB[2] ? 2 : *rLB < sLB[3] ? 3 : 9;
+
+  if (oLF == 0 && oLB == 0)
+    return true;
+
+  return false;
 }
 
 void Sensor::readObstacle(int *oF, int *oL, int *oR) {
@@ -48,28 +87,28 @@ void Sensor::readObstacle(int *oF, int *oL, int *oR) {
   //Detect front sensors
   if (*oF == 0) {
     int dFL, dFM = irDistance(2), dFR;
-    if (dFM < rFM[0]) {
+    if (dFM < sFM[0]) {
       *oF = 0;
       if (DEBUG_SENSOR) Serial.println("F1");
-    } else if (dFM > rFM[0]) {
+    } else if (dFM > sFM[0]) {
       dFL = irDistance(1);
       if (DEBUG_SENSOR) Serial.println("F2");
-      if (dFL < rFL[0]) {
+      if (dFL < sFL[0]) {
         *oF = 0;
         if (DEBUG_SENSOR) Serial.println("F3");
       } else {
         dFR = irDistance(3);
         if (DEBUG_SENSOR) Serial.println("F4");
 
-        if (dFR < rFR[0]) {
+        if (dFR < sFR[0]) {
           *oF = 0;
           if (DEBUG_SENSOR) Serial.println("F5");
         }
 
-        if (dFM < rFM[1] || dFL < rFL[1] || dFR < rFR[1]) {
+        if (dFM < sFM[1] || dFL < sFL[1] || dFR < sFR[1]) {
           *oF = 1;
           if (DEBUG_SENSOR) Serial.println("F6");
-        } else if (dFM < rFM[2] || dFL < rFL[2] || dFR < rFR[2]) {
+        } else if (dFM < sFM[2] || dFL < sFL[2] || dFR < sFR[2]) {
           *oF = 2;
           if (DEBUG_SENSOR) Serial.println("F7");
         } else {
@@ -83,21 +122,21 @@ void Sensor::readObstacle(int *oF, int *oL, int *oR) {
   //Detect left sensors
   if (*oL == 0) {
     int dLF = irDistance(5), dLB;
-    if (dLF < rLF[0]) {
+    if (dLF < sLF[0]) {
       *oL = 0;
       if (DEBUG_SENSOR) Serial.println("L1");
-    } else if (dLF > rLF[0]) {
+    } else if (dLF > sLF[0]) {
       dLB = irDistance(6);
       if (DEBUG_SENSOR) Serial.println("L2");
-      if (dLB < rLB[0]) {
+      if (dLB < sLB[0]) {
         *oL = 0;
         if (DEBUG_SENSOR) Serial.println("L3");
       }
 
-      if (dLF < rLF[1] || dLB < rLB[1]) {
+      if (dLF < sLF[1] || dLB < sLB[1]) {
         *oL = 1;
         if (DEBUG_SENSOR) Serial.println("L4");
-      } else if (dLF < rLF[2] || dLB < rLB[2]) {
+      } else if (dLF < sLF[2] || dLB < sLB[2]) {
         *oL = 2;
         if (DEBUG_SENSOR) Serial.println("L5");
       } else {
@@ -109,19 +148,19 @@ void Sensor::readObstacle(int *oF, int *oL, int *oR) {
 
   if (*oR == 0) {
     int dR = irDistance(4);
-    if (dR < rR[0]) {
+    if (dR < sR[0]) {
       *oR = 0;
       if (DEBUG_SENSOR) Serial.println("R1");
-    } else if (dR < rR[1]) {
+    } else if (dR < sR[1]) {
       *oR = 1;
       if (DEBUG_SENSOR) Serial.println("R2");
-    } else if (dR < rR[2]) {
+    } else if (dR < sR[2]) {
       *oR = 2;
       if (DEBUG_SENSOR) Serial.println("R3");
-    } else if (dR < rR[3]) {
+    } else if (dR < sR[3]) {
       *oR = 3;
       if (DEBUG_SENSOR) Serial.println("R4");
-    } else if (dR < rR[4]) {
+    } else if (dR < sR[4]) {
       *oR = 4;
       if (DEBUG_SENSOR) Serial.println("R5");
     } else {

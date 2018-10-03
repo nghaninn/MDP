@@ -7,12 +7,15 @@
 #define ir5 A4 //LF
 #define ir6 A5 //LB
 
-const int rFL []PROGMEM = {99, 213, 344, 479};
-const int rFM []PROGMEM = {76, 181, 313, 506};
-const int rFR []PROGMEM = {98, 207, 347, 506};
-const int rLF []PROGMEM = {101, 214, 328, 449};
-const int rLB []PROGMEM = {110, 232, 354, 454};
-const int rR  []PROGMEM = {188, 234, 335, 449, 573, 705};
+static const int sFL []PROGMEM = {99, 213, 344, 479};
+static const int sFM []PROGMEM = {76, 181, 313, 506};
+static const int sFR []PROGMEM = {98, 207, 347, 506};
+static const int sLF []PROGMEM = {101, 214, 328, 449};
+static const int sLB []PROGMEM = {110, 232, 354, 454};
+static const int sR  []PROGMEM = {188, 234, 335, 449, 573, 705};
+
+static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
+static const int gLong  []PROGMEM = {1, 2, 3, 4, 5, 6, 100};
 
 class Sensor {
   private:
@@ -28,4 +31,7 @@ class Sensor {
     void detectAll();
     void readObstacle(int *oF, int *oL, int *oR);
     void readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
+    void readSensor(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
+    bool hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rLB, int *rR);
+    bool hasObstacleForSelfCalib(int *rLF, int *rLB);
 };

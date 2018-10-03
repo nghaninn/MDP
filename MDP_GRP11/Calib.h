@@ -1,7 +1,17 @@
+#include "Sensor.h"
+#include "Movement.h"
 
 class Calib {
   private:
+    bool selfCalibNeeded;
+    Sensor *sensor;
+    void calibForward(int *rFL, int *rFM, int *rFR);
+    void calibWallF(int *rFL, int *rFR);
+    void calibWallL();
   public:
     Calib();
-    bool needCalib(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
+    Movement *mov;
+    void needSelfCalib();
+    void selfCalib();
+    void calib();
 };

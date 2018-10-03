@@ -1,7 +1,5 @@
 #include <EnableInterrupt.h>
-#include "Movement.h"
 #include "Calib.h"
-#include "Sensor.h"
 
 bool activate = true;
 //String commands;
@@ -13,7 +11,7 @@ Calib *cal;
 Motor *motor;
 Sensor *s;
 
-bool DEBUG = true;
+bool DEBUG = false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -38,25 +36,6 @@ void motor2() {
 void loop() {
   //  s->detectAll();
   delay(100);
-//  move->moveFront30CM();
-  //  while (activate) {
-  //    while (Serial.available() > 0) {
-  //      commands = Serial.read();
-  //      //      delay(100);
-  //
-  //      Serial.println("Received_command: " + String(commands));
-  //      switch (commands) {
-  //        case 'w': move->moveFront30CM(); break;
-  //        case 's': move->moveReverse(Distance_10CM); break;
-  //        case 'r': move->rotate(90); break;
-  //        case 'f': activate = false; break;
-  ////        case 'nb': move->newBatt(); break;
-  //        default: break;
-  //      }
-  //      String output = "Received_command: " + String(commands);
-  //      Serial.print(output);
-  //    }
-  //  }
 
   while (!readCommand(&commands));
 
@@ -81,15 +60,67 @@ bool readCommand(String *readVal) {
   return false;
 }
 
-bool executeCommand(String sub_command) {
-  if (DEBUG) Serial.print("-Received Command: " + String(sub_command));
-  if (sub_command.charAt(0) == 'a') {
-    sub_command.remove(0, 1);
-    int value = sub_command.toInt() + 1;
-    Serial.println("a" + String(value));
-  } else if (sub_command.charAt(0) == 'w') {
-    move->moveFront30CM();
-  } else if (sub_command.charAt(0) == 's') {
+/*
+   L = left turn
+   R = right turn
+   C = calibrate
+   U = u-turn
+   S = sensor around
+   M1 = move 1
+   M2 = move 2
+   M3 = move 3
 
+   ALGO - 1-LF 2-LB 3-FL 4-FR 5-FM 6-R - DELIMINATOR ","
+   BLIND = 100
+*/
+
+bool executeCommand(String command) {
+  if (DEBUG) Serial.print("-Received Command: " + String(command));
+  
+  String sub_command;
+  
+  while ((sub_command = getSubString(&command, ',')).length()) {
+    if (sub_command.charAt(0) == 'a') {
+      sub_command.remove(0, 1);
+      int value = sub_command.toInt() + 1;
+      Serial.println("b" + String(value));
+    } else if (sub_command.charAt(0) == 'L' || sub_command.charAt(0) == 'l') {
+      move->rotateL(90);
+    } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
+      move->rotate(90);
+    } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
+      cal->calib();
+    } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
+      move->rotate(180);
+    } else if (sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') {
+      //return sensor values
+    } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
+      if(sub_command.charAt(1) == '1')
+        move->move(1);
+      else if(sub_command.charAt(1) == '2')
+        move->move(2);
+      else if(sub_command.charAt(1) == '3')
+        move->move(3);
+      else
+        move->move(3);
+    }
   }
+}
+
+String getSubString(String *command, char separator) {
+  if (!(*command).length())
+    return "";
+
+  String temp = "";
+  int i;
+
+  for (i = 0; i <= (*command).length(); i++) {
+    if ((*command).charAt(i) != separator) {
+      temp += (*command).charAt(i);
+    } else
+      break;
+  }
+  (*command).remove(0, i+1);
+
+  return temp;
 }
