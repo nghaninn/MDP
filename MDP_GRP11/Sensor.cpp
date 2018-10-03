@@ -42,43 +42,59 @@ void Sensor::readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int 
   *oR = dR < sR[0] ? gLong[0] : dR < sR[1] ? gLong[1] : dR < sR[2] ? gLong[2] : dR < sR[3] ? gLong[3] : dR < sR[4] ? gLong[4] : dR < sR[5] ? gLong[5] : gLong[6];
 }
 
-void Sensor::readSensor(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR) {
+void Sensor::readSensorRawValues(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR) {
+  readFrontSensorRawValues(oFL, oFM, oFR);
+  readLeftSensorRawValues(oLF, oLB);
+  readRightSensorRawValues(oR);
+}
+
+void Sensor::readFrontSensorRawValues(int *oFL, int *oFM, int *oFR) {
   *oFL = irDistance(1);
   *oFM = irDistance(2);
   *oFR = irDistance(3);
+}
 
+void Sensor::readLeftSensorRawValues(int *oLF, int *oLB) {
   *oLF = irDistance(5);
   *oLB = irDistance(6);
+}
 
+void Sensor::readRightSensorRawValues(int *oR) {
   *oR = irDistance(4);
 }
 
 bool Sensor::hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rLB, int *rR) {
 
-  int oFL = *rFL < sFL[0] ? 0 : *rFL < sFL[1] ? 1 : *rFL < sFL[2] ? 2 : *rFL < sFL[3] ? 3 : 9;
-  int oFM = *rFM < sFM[0] ? 0 : *rFM < sFM[1] ? 1 : *rFM < sFM[2] ? 2 : *rFM < sFM[3] ? 3 : 9;
-  int oFR = *rFR < sFR[0] ? 0 : *rFR < sFR[1] ? 1 : *rFR < sFR[2] ? 2 : *rFR < sFR[3] ? 3 : 9;
+  int oFL = *rFL < sFL[0] ? gShort[0] : *rFL < sFL[1] ? gShort[1] : *rFL < sFL[2] ? gShort[2] : *rFL < sFL[3] ? gShort[3] : gShort[4];
+  int oFM = *rFM < sFM[0] ? gShort[0] : *rFM < sFM[1] ? gShort[1] : *rFM < sFM[2] ? gShort[2] : *rFM < sFM[3] ? gShort[3] : gShort[4];
+  int oFR = *rFR < sFR[0] ? gShort[0] : *rFR < sFR[1] ? gShort[1] : *rFR < sFR[2] ? gShort[2] : *rFR < sFR[3] ? gShort[3] : gShort[4];
 
-  int oLF = *rLF < sLF[0] ? 0 : *rLF < sLF[1] ? 1 : *rLF < sLF[2] ? 2 : *rLF < sLF[3] ? 3 : 9;
-  int oLB = *rLB < sLB[0] ? 0 : *rLB < sLB[1] ? 1 : *rLB < sLB[2] ? 2 : *rLB < sLB[3] ? 3 : 9;
+  int oLF = *rLF < sLF[0] ? gShort[0] : *rLF < sLF[1] ? gShort[1] : *rLF < sLF[2] ? gShort[2] : *rLF < sLF[3] ? gShort[3] : gShort[4];
+  int oLB = *rLB < sLB[0] ? gShort[0] : *rLB < sLB[1] ? gShort[1] : *rLB < sLB[2] ? gShort[2] : *rLB < sLB[3] ? gShort[3] : gShort[4];
 
-  int oR = *rR < sR[0] ? 0 : *rR < sR[1] ? 1 : *rR < sR[2] ? 2 : *rR < sR[3] ? 3 : *rR < sR[4] ? 4 : *rR < sR[5] ? 5 : 9;
+  int oR = *rR < sR[0] ? gShort[0] : *rR < sR[1] ? gShort[1] : gShort[4];
 
-  if ((oFL == 0 || oFM == 0 || oFR == 0) && (oLF == 0 && oLB == 0))
+  if (DEBUG_SENSOR) Serial.println("hasObsForCal: " + String(oFL) + " | " + String(oFM) + " | " + String(oFR) + " | " + String(oLF) + " | " + String(oLB) + " | " + String(oR));
+
+  if ((oFL <= gShort[3] || oFM <= gShort[3] || oFR <= gShort[3]) && (oLF <= gShort[3] && oLB <= gShort[3]))
     return true;
 
   return false;
 }
 
-bool Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
+int Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
 
-  int oLF = *rLF < sLF[0] ? 0 : *rLF < sLF[1] ? 1 : *rLF < sLF[2] ? 2 : *rLF < sLF[3] ? 3 : 9;
-  int oLB = *rLB < sLB[0] ? 0 : *rLB < sLB[1] ? 1 : *rLB < sLB[2] ? 2 : *rLB < sLB[3] ? 3 : 9;
+  int oLF = *rLF < sLF[0] ? gShort[0] : *rLF < sLF[1] ? gShort[1] : *rLF < sLF[2] ? gShort[2] : *rLF < sLF[3] ? gShort[3] : gShort[4];
+  int oLB = *rLB < sLB[0] ? gShort[0] : *rLB < sLB[1] ? gShort[1] : *rLB < sLB[2] ? gShort[2] : *rLB < sLB[3] ? gShort[3] : gShort[4];
 
-  if (oLF == 0 && oLB == 0)
-    return true;
+  if (DEBUG_SENSOR) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
 
-  return false;
+  if ((*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
+    return 1;
+  else if (oLF < gShort[2] || oLB < gShort[2])
+    return 2;
+
+  return 0;
 }
 
 void Sensor::readObstacle(int *oF, int *oL, int *oR) {
@@ -249,4 +265,11 @@ void Sensor::mergeSort(int arr[], int l, int r) {
 
     merge(arr, l, m, r);
   }
+}
+
+void Sensor::printAllSensors() {
+  int oFL, oFM, oFR, oLF, oLB, oR;
+  readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
+
+  Serial.println("a" + String(oLF) + "," + String(oLB) + "," + String(oFL) + "," + String(oFR) + "," + String(oFM) + "," + String(oR));
 }

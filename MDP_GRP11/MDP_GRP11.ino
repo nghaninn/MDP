@@ -1,8 +1,6 @@
 #include <EnableInterrupt.h>
 #include "Calib.h"
 
-bool activate = true;
-//String commands;
 //char commands;
 String commands;
 
@@ -11,7 +9,8 @@ Calib *cal;
 Motor *motor;
 Sensor *s;
 
-bool DEBUG = false;
+bool DEBUG = true;
+bool AUTO_SELF_CALIB = true;
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,7 +39,9 @@ void loop() {
   while (!readCommand(&commands));
 
   executeCommand(commands);
-
+  
+  while(Serial.available()){Serial.read();} //flush out all command while execution;
+  
   commands = "";
 }
 
@@ -75,34 +76,54 @@ bool readCommand(String *readVal) {
 */
 
 bool executeCommand(String command) {
-  if (DEBUG) Serial.print("-Received Command: " + String(command));
-  
+  if (DEBUG) Serial.println("-Received Command: " + String(command));
+
   String sub_command;
-  
+
   while ((sub_command = getSubString(&command, ',')).length()) {
+    if (DEBUG) Serial.println("-Received Command: " + String(sub_command));
     if (sub_command.charAt(0) == 'a') {
       sub_command.remove(0, 1);
       int value = sub_command.toInt() + 1;
-      Serial.println("b" + String(value));
+      Serial.println("a" + String(value));
     } else if (sub_command.charAt(0) == 'L' || sub_command.charAt(0) == 'l') {
+      if (DEBUG) Serial.println("L");
       move->rotateL(90);
+      if (AUTO_SELF_CALIB)
+        cal->selfCalib();
     } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
+      if (DEBUG) Serial.println("R");
       move->rotate(90);
+      if (AUTO_SELF_CALIB)
+        cal->selfCalib();
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
-      cal->calib();
+      if (DEBUG) Serial.println("C");
+      if (sub_command.charAt(1) == '1')
+        cal->selfCalib();
+      else
+        cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
+      if (DEBUG) Serial.println("U");
       move->rotate(180);
+      if (AUTO_SELF_CALIB)
+        cal->selfCalib();
     } else if (sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') {
-      //return sensor values
+      if (DEBUG) Serial.println("S");
+      s->printAllSensors();
     } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
-      if(sub_command.charAt(1) == '1')
+      if (DEBUG) Serial.println("M");
+      if (sub_command.charAt(1) == '1')
         move->move(1);
-      else if(sub_command.charAt(1) == '2')
+      else if (sub_command.charAt(1) == '2')
         move->move(2);
-      else if(sub_command.charAt(1) == '3')
+      else if (sub_command.charAt(1) == '3')
         move->move(3);
       else
-        move->move(3);
+        move->move(1);
+      //        move->moveSmall(-90);
+
+      if (AUTO_SELF_CALIB)
+        cal->selfCalib();
     }
   }
 }
@@ -120,7 +141,7 @@ String getSubString(String *command, char separator) {
     } else
       break;
   }
-  (*command).remove(0, i+1);
+  (*command).remove(0, i + 1);
 
   return temp;
 }

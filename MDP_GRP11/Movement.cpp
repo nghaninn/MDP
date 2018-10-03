@@ -333,10 +333,11 @@ void Movement::moveSmall(int distance) {
 
   motor->resetTicks();
 
-  while (motor->getM1Ticks() < distance) {
+  while (motor->getM1Ticks() < abs(distance)) {
     int M1setSpeed = -(MSpeedC) * (distance > 0 ? 1 : -1);
     int M2setSpeed = -(MSpeedC) * (distance > 0 ? 1 : -1);
     md.setSpeeds (M1setSpeed, M2setSpeed);
+    delay(10);
   }
 
   brake();
@@ -346,10 +347,11 @@ void Movement::rotateSmall(int distance) { //rotate right by default
 
   motor->resetTicks();
 
-  while (motor->getM1Ticks() < distance) {
+  while (motor->getM1Ticks() < abs(distance)) {
     int M1setSpeed = -(MSpeedC) * (distance > 0 ? 1 : -1);
     int M2setSpeed = (MSpeedC) * (distance > 0 ? 1 : -1);
     md.setSpeeds (M1setSpeed, M2setSpeed);
+    delay(10);
   }
 
   brake();
