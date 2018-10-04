@@ -2,7 +2,7 @@
 #include "Calib.h"
 
 //char commands;
-String commands;
+String commands = "";
 
 Movement *move;
 Calib *cal;
@@ -11,6 +11,7 @@ Sensor *s;
 
 bool DEBUG = true;
 bool AUTO_SELF_CALIB = true;
+bool CALIB_SENSORS_PRINTVALUES = false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -33,15 +34,18 @@ void motor2() {
 }
 
 void loop() {
-  //  s->detectAll();
   delay(100);
+  if (CALIB_SENSORS_PRINTVALUES)
+    s->detectAll();
 
   while (!readCommand(&commands));
 
   executeCommand(commands);
-  
-  while(Serial.available()){Serial.read();} //flush out all command while execution;
-  
+
+  while (Serial.available()) {
+    Serial.read(); //flush out all command while execution;
+  }
+
   commands = "";
 }
 
@@ -90,12 +94,12 @@ bool executeCommand(String command) {
       if (DEBUG) Serial.println("L");
       move->rotateL(90);
       if (AUTO_SELF_CALIB)
-        cal->selfCalib();
+        cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
       if (DEBUG) Serial.println("R");
       move->rotate(90);
       if (AUTO_SELF_CALIB)
-        cal->selfCalib();
+        cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
       if (DEBUG) Serial.println("C");
       if (sub_command.charAt(1) == '1')
@@ -106,10 +110,15 @@ bool executeCommand(String command) {
       if (DEBUG) Serial.println("U");
       move->rotate(180);
       if (AUTO_SELF_CALIB)
-        cal->selfCalib();
+        cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') {
       if (DEBUG) Serial.println("S");
-      s->printAllSensors();
+      if (sub_command.charAt(1) == '1') {
+        s->printAllSensorsRAW();
+      } else if (sub_command.charAt(1) == '2') {
+        s->detectAll();
+      } else
+        s->printAllSensors();
     } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
       if (DEBUG) Serial.println("M");
       if (sub_command.charAt(1) == '1')
@@ -124,6 +133,11 @@ bool executeCommand(String command) {
 
       if (AUTO_SELF_CALIB)
         cal->selfCalib();
+    } else if (sub_command.charAt(0) == 'z') {
+      //      if (DEBUG) Serial.println("z");
+      //      if (sub_command.charAt(1) == 'b')
+      move->newBatt();
+      //      }
     }
   }
 }

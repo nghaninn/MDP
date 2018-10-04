@@ -79,20 +79,10 @@ void Movement::moveReverse(double distance) {
 double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
-  //Battery A:
-  //6.03V p = 2.4 / i = 0.1 / d = 0.2
-  //6.13V p = 1.8 / i = 0.1 / d = 0.1
-  //6.34V p 1.9 / i = 0.1 / d = 0.1
-  //Battery B:
-  //6.27V+ p = 1.8 / i = 0.1 / d = 0.1
-  //6.24V p = 1.7 / i = 0.1 / d = 0.3
-  //6.26V p = 1.73
-  //6.2V  p = 1.6 / i = 0.1 / d = 0.2
-
-  kp = 1.8;//2.4//2.1;//2.2 (FOR 300);//1.35;// (SLIGHTLY RIGHT)//1.4 (TOO LOW STILL LEFT)//1.5 (WORKING FOR 150m) //2228;
-  ki = 0.15;//0//0//.11;//0.8;
-  kd = 0.15;//0.2//0//0.1;
-
+//  kp = 7.9;
+//  ki = 0.45;
+//  kd = 0.38;
+  
   error = motor->getM1Ticks() - motor->getM2Ticks();
   this->integral += error;
   p = kp * error;
@@ -101,7 +91,8 @@ double Movement::computePID() {
   pid = p + i + d;
   PrevTicks = error;
 
-  return pid;
+//  return pid;
+  return 0;
 }
 
 /* ================================================================================================================================================================

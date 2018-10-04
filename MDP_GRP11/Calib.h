@@ -1,7 +1,7 @@
 #include "Sensor.h"
 #include "Movement.h"
 
-const bool DEBUG_CALIB = true;
+const bool DEBUG_CALIB = false;
 
 class Calib {
   private:
@@ -18,5 +18,6 @@ class Calib {
     Movement *mov;
     void needSelfCalib();
     void selfCalib();
+    void selfCalib(bool multipleLevel);
     void calib();
 };

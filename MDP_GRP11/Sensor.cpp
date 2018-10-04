@@ -21,9 +21,10 @@ void Sensor::detect() {
 void Sensor::detectAll() {
   int oFL, oFM, oFR, oLF, oLB, oR;
   int i = 0;
-  while (1) { //i++ < 220){
+  while (i++ < 2200) {//1) { //
     readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
-    if (DEBUG_SENSOR) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+    //    if (DEBUG_SENSOR) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
+    Serial.println("");
   }
 }
 
@@ -89,10 +90,11 @@ int Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
 
   if (DEBUG_SENSOR) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
 
-  if ((*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
-    return 1;
-  else if (oLF < gShort[2] || oLB < gShort[2])
+  if ((oLF < gShort[2] && *rLF > sLF_Limit[1]) || (oLB < gShort[2] && *rLB > sLB_Limit[1]) ||
+      (oLF == gShort[0] && *rLF < sLF_Limit[0]) || (oLB == gShort[0] && *rLB < sLB_Limit[0]))
     return 2;
+  else if ((*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
+    return 1;
 
   return 0;
 }
@@ -199,7 +201,7 @@ int Sensor::irDistance(int sensor) {
 
   int result = sensor == 4 ? 603.74 * pow(map(ir_val[NB_SAMPLE / 2], 0, 1023, 0, 5000) / 1000.0, -1.16) : 277.28 * pow(map(ir_val[NB_SAMPLE / 2], 0, 1023, 0, 5000) / 1000.0, -1.2045);
   result = result < 0 ? 32767 : result;
-  if (DEBUG_SENSOR) Serial.print(" | " + String(sensor) + " | " + String(ir_val[NB_SAMPLE / 2]) + " | " + String(result));
+  if (DEBUG_SENSOR) Serial.print(" | " + String(sensor) + " | " + String(ir_val[NB_SAMPLE / 2]) + "_ | " + String(result));
   return result;
   //Return in mV
   //  return ir_val[NB_SAMPLE / 2];
@@ -273,3 +275,20 @@ void Sensor::printAllSensors() {
 
   Serial.println("a" + String(oLF) + "," + String(oLB) + "," + String(oFL) + "," + String(oFR) + "," + String(oFM) + "," + String(oR));
 }
+
+void Sensor::printAllSensorsRAW() {
+  int oFL, oFM, oFR, oLF, oLB, oR;
+  readSensorRawValues(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
+
+  Serial.println("a" + String(oLF) + "," + String(oLB) + "," + String(oFL) + "," + String(oFR) + "," + String(oFM) + "," + String(oR));
+}
+//
+//void Sensor::printAllSensorsRAWCalib() {
+//
+//  while
+//  int dFL = irDistance(1), dFM = irDistance(2), dFR = irDistance(3);
+//  int dLF = irDistance(5), dLB = irDistance(6);
+//  int dR = irDistance(4);
+//
+//  Serial.println("");
+//}
