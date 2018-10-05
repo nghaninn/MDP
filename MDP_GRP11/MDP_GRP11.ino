@@ -9,7 +9,7 @@ Calib *cal;
 Motor *motor;
 Sensor *s;
 
-bool DEBUG = true;
+bool DEBUG = false;
 bool AUTO_SELF_CALIB = true;
 bool CALIB_SENSORS_PRINTVALUES = false;
 
@@ -34,7 +34,7 @@ void motor2() {
 }
 
 void loop() {
-  delay(100);
+//  delay(100);
   if (CALIB_SENSORS_PRINTVALUES)
     s->detectAll();
 
@@ -42,9 +42,9 @@ void loop() {
 
   executeCommand(commands);
 
-  while (Serial.available()) {
-    Serial.read(); //flush out all command while execution;
-  }
+//  while (Serial.available()) {
+//    Serial.read(); //flush out all command while execution;
+//  }
 
   commands = "";
 }
@@ -102,8 +102,11 @@ bool executeCommand(String command) {
         cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
       if (DEBUG) Serial.println("C");
-      if (sub_command.charAt(1) == '1')
-        cal->selfCalib();
+      if (sub_command.charAt(1) == '1') {
+        if (AUTO_SELF_CALIB)
+          cal->selfCalib();
+      } else if (sub_command.charAt(1) == '2')
+        cal->calibFront();
       else
         cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {

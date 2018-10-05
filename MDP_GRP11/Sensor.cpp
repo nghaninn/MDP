@@ -90,6 +90,9 @@ int Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
 
   if (DEBUG_SENSOR) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
 
+  if(oLF != oLB)
+    return 0;
+
   if ((oLF < gShort[2] && *rLF > sLF_Limit[1]) || (oLB < gShort[2] && *rLB > sLB_Limit[1]) ||
       (oLF == gShort[0] && *rLF < sLF_Limit[0]) || (oLB == gShort[0] && *rLB < sLB_Limit[0]))
     return 2;
@@ -191,6 +194,7 @@ void Sensor::readObstacle(int *oF, int *oL, int *oR) {
 int Sensor::irDistance(int sensor) {
   for (int i = 0; i < NB_SAMPLE; i++) {
     ir_val[i] = analogRead(sensor == 1 ? ir1 : sensor == 2 ? ir2 : sensor == 3 ? ir3 : sensor == 4 ? ir4 : sensor == 5 ? ir5 : sensor == 6 ? ir6 : 0);
+//    if(DEBUG_SENSOR) Serial.println("RAW Sensor: " + String(ir_val[i]));
   }
 
   mergeSort(ir_val, 0, NB_SAMPLE - 1);

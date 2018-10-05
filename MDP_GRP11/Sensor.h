@@ -7,26 +7,26 @@
 #define ir5 A4 //LF
 #define ir6 A5 //LB
 
-static const int sFL_o []PROGMEM = {108, 223, 354, 479};
-static const int sFM_o []PROGMEM = {84, 190, 330, 506};
-static const int sFR_o []PROGMEM = {107, 215, 356, 527};
-static const int sLF_o []PROGMEM = {121, 224, 342, 462};
-static const int sLB_o []PROGMEM = {124, 237, 367, 479};
-static const int sR_o  []PROGMEM = {188, 240, 343, 457, 576, 692};
+static const int sFL_o []PROGMEM = {102, 214, 347, 479};
+static const int sFM_o []PROGMEM = {79, 186, 313, 506};
+static const int sFR_o []PROGMEM = {101, 211, 328, 454};
+static const int sLF_o []PROGMEM = {105, 218, 334, 442};
+static const int sLB_o []PROGMEM = {114, 236, 356, 445};
+static const int sR_o  []PROGMEM = {185, 231, 331, 443, 567, 683};
 
 //With 25% leeway of next distance
-static const int sFL []PROGMEM = {137, 255, 384, 502};
-static const int sFM []PROGMEM = {111, 217, 327, 440};
-static const int sFR []PROGMEM = {134, 247, 380, 523};
-static const int sLF []PROGMEM = {147, 252, 366, 483};
-static const int sLB []PROGMEM = {152, 269, 392, 502};
-static const int sR  []PROGMEM = {201, 265, 369, 485, 602, 716};
+static const int sFL []PROGMEM = {130, 247, 378, 512};
+static const int sFM []PROGMEM = {106, 213, 325, 455};
+static const int sFR []PROGMEM = {128, 240, 357, 470};
+static const int sLF []PROGMEM = {133, 246, 357, 469};
+static const int sLB []PROGMEM = {145, 266, 376, 463};
+static const int sR  []PROGMEM = {196, 256, 358, 473, 593, 708};
 
-static const int sLF_Limit []PROGMEM = {79, 147}; //Lower limit, upper limit;
-static const int sLB_Limit []PROGMEM = {84, 153};
+static const int sLF_Limit []PROGMEM = {79, 145}; //Lower limit, upper limit;
+static const int sLB_Limit []PROGMEM = {84, 157};
 
 static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
-static const int gLong  []PROGMEM = {1, 2, 3, 4, 5, 6, 100};
+static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 
 //static const int gShort []PROGMEM = {0, 1, 2, 3, 100};
 //static const int gLong  []PROGMEM = {0, 1, 2, 3, 4, 5, 100};

@@ -55,7 +55,7 @@ void Movement::moveFront(double distance) {
   }
 
   brake();
-  delay(100);
+//  delay(100);
 }
 
 void Movement::moveReverse(double distance) {
@@ -73,7 +73,7 @@ void Movement::moveReverse(double distance) {
     if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   }
   brake();
-  delay(100);
+//  delay(100);
 }
 
 double Movement::computePID() {
@@ -195,7 +195,7 @@ void Movement::moveFrontShort(int distance) {
   brake();
   if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
-  delay(100);
+//  delay(100);
 }
 
 
@@ -260,7 +260,7 @@ void Movement::rotate(int degree, boolean isRight) {
       rotate(360, Rotate_360deg, isRight);
       degree -= 360;
     }
-    delay (100);
+//    delay (100);
   }
 }
 
@@ -294,7 +294,7 @@ void Movement::rotate(int degree, double distance, boolean isRight) {
   brake();
   if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
-  delay(100);
+//  delay(100);
 }
 
 int Movement::computePID_right(int angle) {
