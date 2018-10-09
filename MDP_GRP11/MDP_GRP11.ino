@@ -34,7 +34,7 @@ void motor2() {
 }
 
 void loop() {
-//  delay(100);
+  //  delay(100);
   if (CALIB_SENSORS_PRINTVALUES)
     s->detectAll();
 
@@ -42,9 +42,9 @@ void loop() {
 
   executeCommand(commands);
 
-//  while (Serial.available()) {
-//    Serial.read(); //flush out all command while execution;
-//  }
+  //  while (Serial.available()) {
+  //    Serial.read(); //flush out all command while execution;
+  //  }
 
   commands = "";
 }
@@ -82,6 +82,8 @@ bool readCommand(String *readVal) {
 bool executeCommand(String command) {
   if (DEBUG) Serial.println("-Received Command: " + String(command));
 
+  //  while(cal->isCalibrating);
+
   String sub_command;
 
   while ((sub_command = getSubString(&command, ',')).length()) {
@@ -107,6 +109,8 @@ bool executeCommand(String command) {
           cal->selfCalib();
       } else if (sub_command.charAt(1) == '2')
         cal->calibFront();
+      else if (sub_command.charAt(1) == '3')
+        cal->calibLeft();
       else
         cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
@@ -145,7 +149,7 @@ bool executeCommand(String command) {
   }
 }
 
-String getSubString(String *command, char separator) {
+String getSubString(String * command, char separator) {
   if (!(*command).length())
     return "";
 

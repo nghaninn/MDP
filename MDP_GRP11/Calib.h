@@ -14,7 +14,9 @@ class Calib {
     void calibWallF(int *rFL, int *rFM, int *rFR);
     void calibWallL();
     void calibWallL(int *rLF, int *rLB);
+    void calibDelay();
   public:
+    bool isCalibrating;
     Calib();
     Movement *mov;
     void needSelfCalib();
@@ -22,4 +24,5 @@ class Calib {
     void selfCalib(bool multipleLevel);
     void calib();
     void calibFront();
+    void calibLeft();
 };

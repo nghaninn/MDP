@@ -4,6 +4,7 @@ static const int Distance_5CM = 140;
 const int Distance_10CM = 275;//245;//278;
 const int Distance_20CM = Distance_10CM * 2.12;
 const int Distance_30CM = Distance_10CM * 3.23;
+static const int Distance_MAX = 3575;
 const int d180 = 4750;//5004;//2500;//
 const int d180_stop = 5004;
 

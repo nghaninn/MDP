@@ -22,6 +22,13 @@ static const int sLF []PROGMEM = {133, 246, 357, 469};
 static const int sLB []PROGMEM = {145, 266, 376, 463};
 static const int sR  []PROGMEM = {196, 256, 358, 473, 593, 708};
 
+//static const int sFL []PROGMEM = {102, 214, 347, 479};
+//static const int sFM []PROGMEM = {79, 186, 313, 506};
+//static const int sFR []PROGMEM = {101, 211, 328, 454};
+//static const int sLF []PROGMEM = {105, 218, 334, 442};
+//static const int sLB []PROGMEM = {114, 236, 356, 445};
+//static const int sR  []PROGMEM = {185, 231, 331, 443, 567, 683};
+
 static const int sLF_Limit []PROGMEM = {79, 145}; //Lower limit, upper limit;
 static const int sLB_Limit []PROGMEM = {84, 157};
 
@@ -33,27 +40,39 @@ static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 
 static const int LB_Calib_Offset = -5;
 
-const int NB_SAMPLE = 10;
 const bool DEBUG_SENSOR = false;
+const bool SENSOR_STABILITY_TEST = true;
 
 class Sensor {
-private:
-  int ir_val[10];
-  int irDistance(int sensor);
-  void merge(int arr[], int l, int m, int r);
-  void mergeSort(int arr[], int l, int r);
-public:
-  Sensor();
-  void detect();
-  void detectAll();
-  void readObstacle(int *oF, int *oL, int *oR);
-  void readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
-  void readSensorRawValues(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
-  void readFrontSensorRawValues(int *oFL, int *oFM, int *oFR);
-  void readLeftSensorRawValues(int *oLF, int *oLB);
-  void readRightSensorRawValues(int *oR);
-  bool hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rLB, int *rR);
-  int hasObstacleForSelfCalib(int *rLF, int *rLB);
-  void printAllSensors();
-  void printAllSensorsRAW();
+  private:
+    int ir_val[10];
+    int NB_SAMPLE = 10;
+    int irDistance(int sensor);
+    void merge(int arr[], int l, int m, int r);
+    void mergeSort(int arr[], int l, int r);
+    void readFrontLeftObstacle(int *oFL);
+    void readFrontMidObstacle(int *oFM);
+    void readFrontRightObstacle(int *oFR);
+    void readLeftFrontObstacle(int *oLF);
+    void readLeftBackObstacle(int *oLB);
+    void readRightObstacle(int *oR);
+    void readFrontLeftSensorRawValues(int *oFL);
+    void readFrontMidSensorRawValues(int *oFM);
+    void readFrontRightSensorRawValues(int *oFR);
+    void readLeftFrontSensorRawValues(int *oLF);
+    void readLeftBackSensorRawValues(int *oLB);
+  public:
+    Sensor();
+    void detect();
+    void detectAll();
+    void readObstacle(int *oF, int *oL, int *oR);
+    void readObstacle(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
+    void readSensorRawValues(int *oFL, int *oFM, int *oFR, int *oLF, int *oLB, int *oR);
+    void readFrontSensorRawValues(int *oFL, int *oFM, int *oFR);
+    void readLeftSensorRawValues(int *oLF, int *oLB);
+    void readRightSensorRawValues(int *oR);
+    bool hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rLB, int *rR);
+    int hasObstacleForSelfCalib(int *rLF, int *rLB);
+    void printAllSensors();
+    void printAllSensorsRAW();
 };
