@@ -3,6 +3,7 @@
 
 //char commands;
 String commands = "";
+String pre_command = "";
 
 Movement *move;
 Calib *cal;
@@ -12,6 +13,7 @@ Sensor *s;
 bool DEBUG = false;
 bool AUTO_SELF_CALIB = true;
 bool CALIB_SENSORS_PRINTVALUES = false;
+bool ONLY_FIRST_SENSOR = true;
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,12 +42,18 @@ void loop() {
 
   while (!readCommand(&commands));
 
-  executeCommand(commands);
-
+  //  if (pre_command != commands) {
   //  while (Serial.available()) {
   //    Serial.read(); //flush out all command while execution;
   //  }
 
+  executeCommand(commands);
+  //  }
+  //  while (Serial.available()) {
+  //    Serial.read(); //flush out all command while execution;
+  //  }
+
+  pre_command = commands;
   commands = "";
 }
 
@@ -53,6 +61,7 @@ bool readCommand(String *readVal) {
   char tmp;
   while (Serial.available())
   {
+    Serial.println(*readVal);
     tmp = Serial.read();
     (*readVal) += tmp;
     // append char to readVal until encounter newline
@@ -82,11 +91,11 @@ bool readCommand(String *readVal) {
 bool executeCommand(String command) {
   if (DEBUG) Serial.println("-Received Command: " + String(command));
 
-  //  while(cal->isCalibrating);
-
   String sub_command;
 
   while ((sub_command = getSubString(&command, ',')).length()) {
+    while (cal->isCalibrating);
+
     if (DEBUG) Serial.println("-Received Command: " + String(sub_command));
     if (sub_command.charAt(0) == 'a') {
       sub_command.remove(0, 1);
@@ -118,8 +127,9 @@ bool executeCommand(String command) {
       move->rotate(180);
       if (AUTO_SELF_CALIB)
         cal->selfCalib(false);
-    } else if (sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') {
+    } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') && ONLY_FIRST_SENSOR) {
       if (DEBUG) Serial.println("S");
+      //      ONLY_FIRST_SENSOR = false;
       if (sub_command.charAt(1) == '1') {
         s->printAllSensorsRAW();
       } else if (sub_command.charAt(1) == '2') {
@@ -146,6 +156,7 @@ bool executeCommand(String command) {
       move->newBatt();
       //      }
     }
+    //    s->printAllSensors();
   }
 }
 

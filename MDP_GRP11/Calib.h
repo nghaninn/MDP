@@ -1,5 +1,5 @@
-#include "Sensor.h"
 #include "Movement.h"
+#include "Sensor.h"
 
 const bool DEBUG_CALIB = true;
 
@@ -9,11 +9,8 @@ class Calib {
     Sensor *sensor;
     void calibForward();
     void calibForward(bool limitedFront);
-    void calibForward(int *rFL, int *rFM, int *rFR, bool limitedFront);
     void calibWallF();
-    void calibWallF(int *rFL, int *rFM, int *rFR);
     void calibWallL();
-    void calibWallL(int *rLF, int *rLB);
     void calibDelay();
   public:
     bool isCalibrating;

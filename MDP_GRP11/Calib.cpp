@@ -1,4 +1,10 @@
 #include "Calib.h"
+#include "Global.h"
+
+int rFL, rFM, rFR, rLF, rLB, rR;
+int oFL, oFM, oFR, oLF, oLB, oR;
+int aFL[3], aFM[3], aFR[3], aLF[3], aLB[3], aR[3];
+int bFL[3], bFM[3], bFR[3], bLF[3], bLB[3], bR[3];
 
 Calib::Calib() {
   mov = new Movement();
@@ -21,17 +27,15 @@ void Calib::calibDelay() {
 
 void Calib::selfCalib(bool multipleLevel) {
   isCalibrating = true;
-  int rLF, rLB;
 
-  sensor->readLeftSensorRawValues(&rLF, &rLB);
-
-  int calibLEVEL = sensor->hasObstacleForSelfCalib(&rLF, &rLB);
+  int calibLEVEL = sensor->hasObstacleForSelfCalib();
 
   if (calibLEVEL == 1) {
     if (DEBUG_CALIB) Serial.println("SELF CALIB LEVEL 1");
 
-    calibWallL(&rLF, &rLB);
+    calibWallL();
   }
+
   isCalibrating = false;
 }
 
@@ -39,11 +43,8 @@ void Calib::calibLeft() {
   isCalibrating = true;
 
   if (DEBUG_CALIB) Serial.println("SELF CALIB LEVEL 3");
-  int rLF, rLB;
 
-  sensor->readLeftSensorRawValues(&rLF, &rLB);
-
-  int calibLEVEL = sensor->hasObstacleForSelfCalib(&rLF, &rLB);
+  int calibLEVEL = sensor->hasObstacleForSelfCalib();
 
   if (calibLEVEL == 2) {
     mov->rotateL(90);
@@ -68,46 +69,45 @@ void Calib::calibLeft() {
 */
 void Calib::calib() {
   isCalibrating = true;
+
   if (DEBUG_CALIB) Serial.println("CALIB");
 
-  int rFL, rFM, rFR, rLF, rLB, rR, i = 0;
+  int i = 0;
 
-  while ((i++) < 2) {
-    sensor->readSensorRawValues(&rFL, &rFM, &rFR, &rLF, &rLB, &rR);
+  while ((i++) < 1) {
+    if (sensor->hasObstacleForCalib()) {
 
-    if (DEBUG_CALIB) Serial.println(String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | " );
-
-    if (sensor->hasObstacleForCalib(&rFL, &rFM, &rFR, &rLF, &rLB, &rR)) {
       if (DEBUG_CALIB) Serial.println("NEED CALIB");
-      calibForward(&rFL, &rFM, &rFR, false);
+
+      calibForward(false);
       calibDelay();
 
-      sensor->readFrontSensorRawValues(&rFL, &rFM, &rFR);
-      calibWallF(&rFL, &rFM, &rFR);
+      sensor->readFrontSensorRawValues();
+      calibWallF();
       calibDelay();
 
       mov->rotateL(90);
       calibDelay();
 
-      sensor->readFrontSensorRawValues(&rFL, &rFM, &rFR);
-      calibForward(&rFL, &rFM, &rFR, false);
+      sensor->readFrontSensorRawValues();
+      calibForward(false);
       calibDelay();
 
-      sensor->readFrontSensorRawValues(&rFL, &rFM, &rFR);
-      calibWallF(&rFL, &rFM, &rFR);
+      sensor->readFrontSensorRawValues();
+      calibWallF();
       calibDelay();
 
       mov->rotate(90);
       calibDelay();
 
-      sensor->readLeftSensorRawValues(&rLF, &rLB);
-      calibWallL(&rLF, &rLB);
+      sensor->readLeftSensorRawValues();
+      calibWallL();
     }
-    //    calibWallL();
+
     isCalibrating = false;
   }
 
-  if (DEBUG_CALIB) sensor->readSensorRawValues(&rFL, &rFM, &rFR, &rLF, &rLB, &rR);
+  if (DEBUG_CALIB) sensor->readSensorRawValues();
   if (DEBUG_CALIB) Serial.println("ENDING SENSOR READING " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
 }
 
@@ -128,122 +128,100 @@ void Calib::calibForward() {
 }
 
 void Calib::calibForward(bool limitedFront) {
-  int rFL, rFM, rFR, rLF, rLB, rR;
-  sensor->readSensorRawValues(&rFL, &rFM, &rFR, &rLF, &rLB, &rR);
+  int i = 100;
+  do {
+    sensor->readSensorRawValues();
 
-  if (DEBUG_CALIB) Serial.println("Calib Forward: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
-  //  Serial.println("Calib Forward");
+    if (DEBUG_CALIB) Serial.println("Calib Forward: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
 
-  calibForward(&rFL, &rFM, &rFR, limitedFront);
-}
+    int distance = 0;
 
+    if (rFM >= rFL && rFM >= rFR && rFL < sFL_o[0] && rFM < sFM_o[0] && rFR < sFR_o[0]) {
+      if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
+      distance = -50;
+    } else if (rFM - sFM_o[0] > 2) {
+      if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
+      distance = (rFM - sFM_o[0]) * 3;
+    } else if (rFM - sFM_o[0] < -2) {
+      if (DEBUG_CALIB) Serial.println("MOVE BACK");
+      distance = -1;
+    }
 
-void Calib::calibForward(int *rFL, int *rFM, int *rFR, bool limitedFront) {
-  int distance = 0;
+    if (abs(distance) > 0) {
+      distance = (((abs(distance) > 50) && limitedFront) ? ((distance > 0 && limitedFront) ? 50 : (-1 * 50)) : ((abs(distance) > Distance_MAX) ? ((distance > 0) ? Distance_MAX : (-1 * 50)) : distance));
+      mov->moveSmall(distance);
+      if (DEBUG_CALIB) Serial.println("Calib Moving Forward: " + String(distance));
+    }
+    if (abs(distance) > 30)
+      calibForward(limitedFront);
 
-  if (*rFM >= *rFL && *rFM >= *rFR && *rFL < sFL && *rFM < sFM && *rFR < sFR) {
-    if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
-    distance = -130;
-  } else if (*rFM - sFM_o[0] > 2) {
-    if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
-    distance = (*rFM - sFM_o[0]) * 3;
-  } else if (*rFM - sFM_o[0] < -2) {
-    if (DEBUG_CALIB) Serial.println("MOVE BACK");
-    distance = abs(*rFM - sFM_o[0]) * -3;;
-  }
-
-  if (abs(distance) > 0) {
-    distance = (((abs(distance) > Distance_5CM) && limitedFront) ? ((distance > 0 && limitedFront) ? Distance_5CM : (-1 * Distance_5CM)) : ((abs(distance) > Distance_MAX) ? ((distance > 0) ? Distance_MAX : (-1 * Distance_5CM)) : distance));
-    mov->moveSmall(distance);
-    if (DEBUG_CALIB) Serial.println("Calib Moving Forward: " + String(distance));
-  } if (distance < -100)
-    calibForward();
+  } while (abs(rFM - sFM_o[0]) > 1 && i--);
 }
 
 void Calib::calibWallF() {
+  int i = 100;
+  do {
+    sensor->readFrontSensorRawValues();
 
-  int rFL, rFM, rFR;
-  sensor->readFrontSensorRawValues(&rFL, &rFM, &rFR);
+    if (DEBUG_CALIB) Serial.println("Calib Wall F: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | DEFAULT: " + String(sFM[0]) );
 
-  if (DEBUG_CALIB) Serial.println("Calib Wall F: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | DEFAULT: " + String(sFM[0]) );
+    int distance = 0;
 
-  calibWallF(&rFL, &rFM, &rFR);
-}
+    if ((rFL - rFR) > 2) { //rotate right
+      distance = 1;
+    } else if ((rFL - rFR) < -2) { // rotate left
+      distance = -1;
+    }
 
-void Calib::calibWallF(int *rFL, int *rFM, int *rFR) {
-  int distance = 0;
-
-  if ((*rFL - *rFR) > 2) { //rotate right
-    if (*rFL - *rFR > 6)
-      distance = (*rFL - *rFR) * 2;
-    else
-      distance = 5;
-  } else if ((*rFL - *rFR) < -2) { // rotate left
-    if (*rFL - *rFR < -6)
-      distance = (*rFL - *rFR) * 2;
-    else
-      distance = 5;
-  }
-
-  if (abs(distance) > 0) {
-    distance = (abs(distance) > Rotate_45deg ? (distance > 0 ? Rotate_45deg : Rotate_45deg * -1) : distance);
     mov->rotateSmall(distance);
     if (DEBUG_CALIB) Serial.println("Calib F Rotating: " + String(distance));
-  }
+  } while (abs(rFL - rFR) > 1 && i--);
 
   selfCalibNeeded = false;
 }
 
 void Calib::calibWallL() {
-
-  int rLF, rLB;
-  sensor->readLeftSensorRawValues(&rLF, &rLB);
-
+  sensor->readLeftSensorRawValues();
   if (DEBUG_CALIB) Serial.println("Calib Wall L: " + String(rLF) + " | " + String(rLB) );
 
-  calibWallL(&rLF, &rLB);
-}
-
-void Calib::calibWallL(int *rLF, int *rLB) {
-
-  if (sensor->hasObstacleForSelfCalib(rLF, rLB)) {
+  if (sensor->hasObstacleForSelfCalib()) {
 
     int distance = 0;
-    int correspondingLB = map(map(*rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
+    int correspondingLB = map(map(rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
     if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingLB));
 
-    if ((correspondingLB + LB_Calib_Offset - *rLB) < -2) { //rotate right
-      distance = (correspondingLB + LB_Calib_Offset - *rLB) * -1;
-    } else if ((correspondingLB + LB_Calib_Offset - *rLB) > 2) { // rotate left
-      distance = (correspondingLB + LB_Calib_Offset - *rLB) * -1;
+    if ((correspondingLB + LB_Calib_Offset - rLB) < -2) { //rotate right
+      distance = (correspondingLB + LB_Calib_Offset - rLB) * -1;
+    } else if ((correspondingLB + LB_Calib_Offset - rLB) > 2) { // rotate left
+      distance = (correspondingLB + LB_Calib_Offset - rLB) * -1;
     }
 
     if (abs(distance) > 0) {
-      distance = (abs(distance) > Rotate_45deg ? (distance > 0 ? Rotate_45deg : Rotate_45deg * -1) : distance);
+      distance = (abs(distance) > Rotate_45deg ? (distance > 0 ? Rotate_45deg : Rotate_45deg  - 1) : distance);
       if (DEBUG_CALIB) Serial.println("Moving Distance: " + String(distance));
       mov->rotateSmall(distance);
     }
 
+    int i = 100;
     do {
       calibDelay();
+      sensor->readLeftSensorRawValues();
+      if (DEBUG_CALIB) Serial.println("Calib Wall L: " + String(rLF) + " | " + String(rLB) );
 
       distance = 0;
-      correspondingLB = map(map(*rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
+      correspondingLB = map(map(rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
       if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingLB));
 
-      if ((correspondingLB + LB_Calib_Offset - *rLB) < -2) { //rotate right
-        distance = 2;
-      } else if ((correspondingLB + LB_Calib_Offset - *rLB) > 2) { // rotate left
-        distance = -2;
+      if ((correspondingLB + LB_Calib_Offset - rLB) < -2) { //rotate right
+        distance = 1;
+      } else if ((correspondingLB + LB_Calib_Offset - rLB) > 2) { // rotate left
+        distance = -1;
       }
 
-      if (DEBUG_CALIB) Serial.println("Moving Distance: " + String(distance));
       mov->rotateSmall(distance);
       if (DEBUG_CALIB) Serial.println("Calib L Rotating: " + String(distance));
 
-
-      sensor->readLeftSensorRawValues(rLF, rLB);
-    } while (abs(correspondingLB + LB_Calib_Offset - *rLB) < 2);
+    } while (abs(correspondingLB + LB_Calib_Offset - rLB) && i--);
 
     selfCalibNeeded = false;
   }
