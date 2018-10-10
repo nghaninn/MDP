@@ -29,8 +29,8 @@ static const int sR  []PROGMEM = {196, 256, 358, 473, 593, 708};
 //static const int sLB []PROGMEM = {114, 236, 356, 445};
 //static const int sR  []PROGMEM = {185, 231, 331, 443, 567, 683};
 
-static const int sLF_Limit []PROGMEM = {79, 145}; //Lower limit, upper limit;
-static const int sLB_Limit []PROGMEM = {84, 157};
+static const int sLF_Limit []PROGMEM = {71, 163, 93, 141}; // extreme Lower limit, extreme upper limit;
+static const int sLB_Limit []PROGMEM = {70, 176, 96, 149};
 
 static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
 static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
@@ -38,9 +38,9 @@ static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 //static const int gShort []PROGMEM = {0, 1, 2, 3, 100};
 //static const int gLong  []PROGMEM = {0, 1, 2, 3, 4, 5, 100};
 
-static const int LB_Calib_Offset = -5;
+static const int LB_Calib_Offset = 0;
 
-const bool DEBUG_SENSOR = false;
+const bool DEBUG_SENSOR = true;
 const bool SENSOR_STABILITY_TEST = true;
 
 class Sensor {

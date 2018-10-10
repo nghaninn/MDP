@@ -148,18 +148,18 @@ bool Sensor::hasObstacleForCalib(int *rFL, int *rFM, int *rFR, int *rLF, int *rL
 
 int Sensor::hasObstacleForSelfCalib(int *rLF, int *rLB) {
 
-  int oLF = *rLF < sLF_o[0] ? gShort[0] : *rLF < sLF_o[1] ? gShort[1] : *rLF < sLF_o[2] ? gShort[2] : *rLF < sLF_o[3] ? gShort[3] : gShort[4];
-  int oLB = *rLB < sLB_o[0] ? gShort[0] : *rLB < sLB_o[1] ? gShort[1] : *rLB < sLB_o[2] ? gShort[2] : *rLB < sLB_o[3] ? gShort[3] : gShort[4];
+  int oLF = *rLF < sLF[0] ? gShort[0] : *rLF < sLF[1] ? gShort[1] : *rLF < sLF[2] ? gShort[2] : *rLF < sLF[3] ? gShort[3] : gShort[4];
+  int oLB = *rLB < sLB[0] ? gShort[0] : *rLB < sLB[1] ? gShort[1] : *rLB < sLB[2] ? gShort[2] : *rLB < sLB[3] ? gShort[3] : gShort[4];
 
   if (DEBUG_SENSOR) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
 
   if (oLF != oLB)
     return 0;
 
-  if ((oLF < gShort[2] && *rLF > sLF_Limit[1]) || (oLB < gShort[2] && *rLB > sLB_Limit[1]) ||
-      (oLF == gShort[0] && *rLF < sLF_Limit[0]) || (oLB == gShort[0] && *rLB < sLB_Limit[0]))
+  if ((oLF < gShort[2] && *rLF > sLF_Limit[3]) || (oLB < gShort[2] && *rLB > sLB_Limit[3]) ||
+      (oLF == gShort[0] && *rLF < sLF_Limit[2]) || (oLB == gShort[0] && *rLB < sLB_Limit[2]))
     return 2;
-  else if ((*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
+  else if (oLF < gShort[1] || oLB < gShort[1])//(*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
     return 1;
 
   return 0;

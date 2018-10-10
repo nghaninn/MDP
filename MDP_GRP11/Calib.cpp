@@ -114,8 +114,8 @@ void Calib::calib() {
 void Calib::calibFront() {
   isCalibrating = true;
 
-  if (DEBUG_CALIB) Serial.println("SELF CALIB LEVEL 2");  
-  
+  if (DEBUG_CALIB) Serial.println("SELF CALIB LEVEL 2");
+
   calibForward(false);
   calibDelay();
 
@@ -208,44 +208,42 @@ void Calib::calibWallL(int *rLF, int *rLB) {
 
   if (sensor->hasObstacleForSelfCalib(rLF, rLB)) {
 
+    int distance = 0;
+    int correspondingLB = map(map(*rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
+    if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingLB));
+
+    if ((correspondingLB + LB_Calib_Offset - *rLB) < -2) { //rotate right
+      distance = (correspondingLB + LB_Calib_Offset - *rLB) * -1;
+    } else if ((correspondingLB + LB_Calib_Offset - *rLB) > 2) { // rotate left
+      distance = (correspondingLB + LB_Calib_Offset - *rLB) * -1;
+    }
+
+    if (abs(distance) > 0) {
+      distance = (abs(distance) > Rotate_45deg ? (distance > 0 ? Rotate_45deg : Rotate_45deg * -1) : distance);
+      if (DEBUG_CALIB) Serial.println("Moving Distance: " + String(distance));
+      mov->rotateSmall(distance);
+    }
+
     do {
       calibDelay();
 
-      int distance = 0;
+      distance = 0;
+      correspondingLB = map(map(*rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
+      if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingLB));
 
-      //      if ((*rLB + LB_Calib_Offset - *rLF) > 2) { //rotate right
-      //        if (*rLB + LB_Calib_Offset - *rLF > 6)
-      //          distance = (*rLB + LB_Calib_Offset - *rLF) * 1;
-      //        else
-      //          distance = 5;
-      //      } else if ((*rLB + LB_Calib_Offset - *rLF) < -2) { // rotate left
-      //        if (*rLB + LB_Calib_Offset - *rLF < -6)
-      //          distance = (*rLB + LB_Calib_Offset - *rLF) * 1;
-      //        else
-      //          distance = 5;
-      //      }
-
-      if ((*rLB + LB_Calib_Offset - *rLF) > 2) { //rotate right
-        //        if (*rLB + LB_Calib_Offset - *rLF > 6)
-        distance = (*rLB + LB_Calib_Offset - *rLF) * 1;
-        //        else
-        //          distance = 5;
-      } else if ((*rLB + LB_Calib_Offset - *rLF) < -2) { // rotate left
-        //        if (*rLB + LB_Calib_Offset - *rLF < -6)
-        distance = (*rLB + LB_Calib_Offset - *rLF) * 1;
-        //        else
-        //          distance = 5;
+      if ((correspondingLB + LB_Calib_Offset - *rLB) < -2) { //rotate right
+        distance = 2;
+      } else if ((correspondingLB + LB_Calib_Offset - *rLB) > 2) { // rotate left
+        distance = -2;
       }
 
-      if (abs(distance) > 0) {
-        distance = (abs(distance) > Rotate_45deg ? (distance > 0 ? Rotate_45deg : Rotate_45deg * -1) : distance);
+      if (DEBUG_CALIB) Serial.println("Moving Distance: " + String(distance));
+      mov->rotateSmall(distance);
+      if (DEBUG_CALIB) Serial.println("Calib L Rotating: " + String(distance));
 
-        mov->rotateSmall(distance);
-        if (DEBUG_CALIB) Serial.println("Calib L Rotating: " + String(distance));
-      }
 
       sensor->readLeftSensorRawValues(rLF, rLB);
-    } while (0); //while (abs(*rLB + LB_Calib_Offset - *rLF));
+    } while (abs(correspondingLB + LB_Calib_Offset - *rLB) < 2);
 
     selfCalibNeeded = false;
   }

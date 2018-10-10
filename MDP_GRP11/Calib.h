@@ -1,7 +1,7 @@
 #include "Sensor.h"
 #include "Movement.h"
 
-const bool DEBUG_CALIB = false;
+const bool DEBUG_CALIB = true;
 
 class Calib {
   private:
