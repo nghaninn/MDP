@@ -35,7 +35,6 @@ static const int LB_Calib_Offset = 0;
 //int aFL[3], aFM[3], aFR[3], aLF[3], aLB[3], aR[3];
 //int bFL[3], bFM[3], bFR[3], bLF[3], bLB[3], bR[3];
 
-const bool DEBUG_SENSOR = false;
 const bool SENSOR_STABILITY_TEST = true;
 static int NB_SAMPLE = 10;
 

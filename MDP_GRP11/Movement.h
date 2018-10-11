@@ -20,8 +20,6 @@ const int MSpeedR = 150;
 const int MSpeedC = 150;
 const int offset = 0;//-10; //M1 Speed offset (Going abt 20pwm faster)
 
-const bool DEBUG_MOVEMENT = false;
-
 class Movement {
   private:
     int integral;

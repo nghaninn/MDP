@@ -1,5 +1,6 @@
 #include <EnableInterrupt.h>
 #include "Calib.h"
+#include "Global.h"
 
 //char commands;
 String commands = "";
@@ -10,10 +11,10 @@ Calib *cal;
 Motor *motor;
 Sensor *s;
 
-bool DEBUG = false;
 bool AUTO_SELF_CALIB = true;
 bool CALIB_SENSORS_PRINTVALUES = false;
-bool ONLY_FIRST_SENSOR = true;
+bool ONLY_FIRST_SENSOR = false;
+static int ALREADY_SENT_OUT_SENSOR = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -36,22 +37,34 @@ void motor2() {
 }
 
 void loop() {
-  //  delay(100);
   if (CALIB_SENSORS_PRINTVALUES)
     s->detectAll();
 
   while (!readCommand(&commands));
 
   //  if (pre_command != commands) {
-  //  while (Serial.available()) {
-  //    Serial.read(); //flush out all command while execution;
+  //    while (Serial.available()) {
+  //      Serial.read(); //flush out all command while execution;
+  //    }
+  //    pre_command = "";
   //  }
 
+  if ((commands.charAt(0) == 'S' || commands.charAt(0) == 's')) {
+    if (DEBUG) Serial.println(String(ALREADY_SENT_OUT_SENSOR));
+    if (ALREADY_SENT_OUT_SENSOR > 0)
+      ALREADY_SENT_OUT_SENSOR = 0;
+    else if (ALREADY_SENT_OUT_SENSOR > 0)
+      ALREADY_SENT_OUT_SENSOR++;
+    else
+      ALREADY_SENT_OUT_SENSOR = 0;
+  } else
+    ALREADY_SENT_OUT_SENSOR = 0;
+
   executeCommand(commands);
-  //  }
-  //  while (Serial.available()) {
-  //    Serial.read(); //flush out all command while execution;
-  //  }
+
+//  while (Serial.available()) {
+//    Serial.read(); //flush out all command while execution;
+//  }
 
   pre_command = commands;
   commands = "";
@@ -61,13 +74,9 @@ bool readCommand(String *readVal) {
   char tmp;
   while (Serial.available())
   {
-    Serial.println(*readVal);
     tmp = Serial.read();
     (*readVal) += tmp;
-    // append char to readVal until encounter newline
-    if (tmp != '\n')
-      continue;
-    else
+    if (tmp == '\n' || tmp == '\0')
       return true; // stop blocking
   }
   // block if nothing comes in
@@ -89,7 +98,7 @@ bool readCommand(String *readVal) {
 */
 
 bool executeCommand(String command) {
-  if (DEBUG) Serial.println("-Received Command: " + String(command));
+  if (DEBUG) Serial.println("-Received Command: " + String(command) + " | " + String(ALREADY_SENT_OUT_SENSOR));
 
   String sub_command;
 
@@ -127,15 +136,25 @@ bool executeCommand(String command) {
       move->rotate(180);
       if (AUTO_SELF_CALIB)
         cal->selfCalib(false);
-    } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's') && ONLY_FIRST_SENSOR) {
+    } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's')) {
       if (DEBUG) Serial.println("S");
-      //      ONLY_FIRST_SENSOR = false;
       if (sub_command.charAt(1) == '1') {
         s->printAllSensorsRAW();
+        ALREADY_SENT_OUT_SENSOR++;
       } else if (sub_command.charAt(1) == '2') {
         s->detectAll();
-      } else
+        ALREADY_SENT_OUT_SENSOR++;
+      } else if (sub_command.charAt(1) == '9') {
+        move->rotateL(90);
+        cal->calib();
+        move->rotateR(90);
+        cal->selfCalib();
         s->printAllSensors();
+        ALREADY_SENT_OUT_SENSOR++;
+      } else if (ALREADY_SENT_OUT_SENSOR == 0) {
+        s->printAllSensors();
+        ALREADY_SENT_OUT_SENSOR++;
+      }
     } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
       if (DEBUG) Serial.println("M");
       if (sub_command.charAt(1) == '1')
@@ -156,8 +175,14 @@ bool executeCommand(String command) {
       move->newBatt();
       //      }
     }
-    //    s->printAllSensors();
   }
+  delay(100);
+
+  if (ALREADY_SENT_OUT_SENSOR == 0) {
+    s->printAllSensors();
+    ALREADY_SENT_OUT_SENSOR++;
+  }
+  if (DEBUG) Serial.println(String(ALREADY_SENT_OUT_SENSOR));
 }
 
 String getSubString(String * command, char separator) {

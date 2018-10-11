@@ -336,6 +336,8 @@ void Sensor::mergeSort(int arr[], int l, int r) {
   }
 }
 
+static int pFL = 0, pFM = 0, pFR = 0, pLF = 0, pLB = 0, pR = 0, i = 0;
+
 void Sensor::printAllSensors() {
   //  int oFL, oFM, oFR, oLF, oLB, oR;
   //  readObstacle(&(oFL = 0), &(oFM = 0), &(oFR = 0), &(oLF = 0), &(oLB = 0), &(oR = 0));
@@ -357,7 +359,7 @@ void Sensor::printAllSensors() {
     mergeSort(aLB, 0, 2);
     mergeSort(aR, 0, 2);
 
-    bool sensorCorrection; int i = 0;
+    bool sensorCorrection;
 
     do {
       sensorCorrection = false;
@@ -409,6 +411,14 @@ void Sensor::printAllSensors() {
     } while (sensorCorrection && (i++ < 3));
 
     if (DEBUG_SENSOR) Serial.println("\na" + String(aLF[0]) + "," + String(aLB[0]) + "," + String(aFL[0]) + "," + String(aFR[0]) + "," + String(aFM[0]) + "," + String(aR[0]));
+    if (i > 5) {
+      if (pFL == aFL[1] && pLF == aLF[1] && pR == aR[1] ) {
+        if(DEBUG_SENSOR) Serial.println("a0,0,0,0,0,0" + String(i));
+      }
+      i = 0;
+    }
+    i++;
+    pFL = aFL[1]; pFM = aFM[1]; pFR = aFR[1]; pLF = aLF[1]; pLB = aLB[1]; pR = aR[1];
     Serial.println("a" + String(aLF[1]) + "," + String(aLB[1]) + "," + String(aFL[1]) + "," + String(aFR[1]) + "," + String(aFM[1]) + "," + String(aR[1]));
     if (DEBUG_SENSOR) Serial.println("a" + String(aLF[2]) + "," + String(aLB[2]) + "," + String(aFL[2]) + "," + String(aFR[2]) + "," + String(aFM[2]) + "," + String(aR[2]));
   } else

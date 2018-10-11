@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include "Global.h"
 
 Movement::Movement() {
   motor = new Motor();
@@ -91,8 +92,8 @@ double Movement::computePID() {
   pid = p + i + d;
   PrevTicks = error;
 
-//  return pid;
-  return 0;
+  return pid;
+//  return 0;
 }
 
 /* ================================================================================================================================================================

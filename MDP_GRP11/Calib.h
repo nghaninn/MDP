@@ -1,8 +1,6 @@
 #include "Movement.h"
 #include "Sensor.h"
 
-const bool DEBUG_CALIB = true;
-
 class Calib {
   private:
     bool selfCalibNeeded;
