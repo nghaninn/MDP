@@ -157,11 +157,12 @@ bool executeCommand(String command) {
       }
     } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
       if (DEBUG) Serial.println("M");
-      if (sub_command.charAt(1) == '1')
+      if (sub_command.charAt(1) == '1') {
         move->move(1);
-      else if (sub_command.charAt(1) == '2')
+        delay(300);
+      } else if (sub_command.charAt(1) == '2') {
         move->move(2);
-      else if (sub_command.charAt(1) == '3')
+      } else if (sub_command.charAt(1) == '3')
         move->move(3);
       else
         move->move(1);
@@ -176,7 +177,7 @@ bool executeCommand(String command) {
       //      }
     }
   }
-  delay(100);
+  delay(150);
 
   if (ALREADY_SENT_OUT_SENSOR == 0) {
     s->printAllSensors();

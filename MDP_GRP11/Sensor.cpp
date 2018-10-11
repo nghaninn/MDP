@@ -365,40 +365,58 @@ void Sensor::printAllSensors() {
       sensorCorrection = false;
       if (DEBUG_SENSOR) Serial.println("\nSensor Reading Loop: " + String(i));
 
-      if (aFL[2] - aFL[0] > 1 && aFL[0] != aFL[1]) {
+      if (aFL[2] != aFL[0] && aFL[0] != aFL[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FL | " + String(aFL[2]) + " - " + String(aFL[0]));
         readFrontLeftObstacle();
-        aFL[2] = oFL;
+        if(aFL[0] == aFL[1])
+          aFL[2] = oFL;
+        else 
+          aFL[0] = oFL;
         sensorCorrection = true;
       }
-      if (aFM[2] - aFM[0] > 1 && aFM[0] != aFM[1]) {
+      if (aFM[2] != aFM[0] && aFM[0] != aFM[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FM | " + String(aFM[2]) + " - " + String(aFM[0]));
         readFrontMidObstacle();
-        aFM[2] = oFM;
+        if(aFM[0] == aFM[1])
+          aFM[2] = oFM;
+        else 
+          aFM[0] = oFM;
         sensorCorrection = true;
       }
-      if (aFR[2] - aFR[0] > 1 && aFR[0] != aFR[1]) {
+      if (aFR[2] != aFR[0] && aFR[0] != aFR[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FR | " + String(aFR[2]) + " - " + String(aFR[0]));
         readFrontRightObstacle();
-        aFR[2] = oFR;
+        if(aFR[0] == aFR[1])
+          aFR[2] = oFR;
+        else 
+          aFR[0] = oFR;
         sensorCorrection = true;
       }
-      if (aLF[2] - aLF[0] > 1 && aLF[0] != aLF[1]) {
+      if (aLF[2] != aLF[0] && aLF[0] != aLF[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh LF | " + String(aLF[2]) + " - " + String(aLF[0]));
         readLeftFrontObstacle();
-        aLF[2] = oLF;
+        if(aLF[0] == aLF[1])
+          aLF[2] = oLF;
+        else 
+          aLF[0] = oLF;
         sensorCorrection = true;
       }
-      if (aLB[2] - aLB[0] > 1 && aLB[0] != aLB[1]) {
+      if (aLB[2] != aLB[0] && aLB[0] != aLB[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh LB | " + String(aLB[2]) + " - " + String(aLB[0]));
         readLeftBackObstacle();
-        aLB[2] = oLB;
+        if(aFL[0] == aFL[1])
+          aLB[2] = oLB;
+        else 
+          aLB[0] = oLB;
         sensorCorrection = true;
       }
-      if (aR[2] - aR[0] > 1 && aR[0] != aR[1]) {
+      if (aR[2] != aR[0] && aR[0] != aR[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh R | " + String(aR[2]) + " - " + String(aR[0]));
         readRightObstacle();
-        aR[2] = oR;
+        if(aFL[0] == aFL[1])
+          aR[2] = oR;
+        else 
+          aR[0] = oR;
         sensorCorrection = true;
       }
 
@@ -408,7 +426,7 @@ void Sensor::printAllSensors() {
       mergeSort(aLF, 0, 2);
       mergeSort(aLB, 0, 2);
       mergeSort(aR, 0, 2);
-    } while (sensorCorrection && (i++ < 3));
+    } while (sensorCorrection && (i++ < 7));
 
     if (DEBUG_SENSOR) Serial.println("\na" + String(aLF[0]) + "," + String(aLB[0]) + "," + String(aFL[0]) + "," + String(aFR[0]) + "," + String(aFM[0]) + "," + String(aR[0]));
     if (i > 5) {
