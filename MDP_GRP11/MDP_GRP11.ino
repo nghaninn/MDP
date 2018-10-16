@@ -62,9 +62,9 @@ void loop() {
 
   executeCommand(commands);
 
-//  while (Serial.available()) {
-//    Serial.read(); //flush out all command while execution;
-//  }
+  //  while (Serial.available()) {
+  //    Serial.read(); //flush out all command while execution;
+  //  }
 
   pre_command = commands;
   commands = "";
@@ -159,14 +159,13 @@ bool executeCommand(String command) {
       if (DEBUG) Serial.println("M");
       if (sub_command.charAt(1) == '1') {
         move->move(1);
-        delay(300);
+        delay(150);
       } else if (sub_command.charAt(1) == '2') {
         move->move(2);
       } else if (sub_command.charAt(1) == '3')
         move->move(3);
       else
         move->move(1);
-      //        move->moveSmall(-90);
 
       if (AUTO_SELF_CALIB)
         cal->selfCalib();
@@ -177,7 +176,7 @@ bool executeCommand(String command) {
       //      }
     }
   }
-  delay(150);
+  //  delay(150);
 
   if (ALREADY_SENT_OUT_SENSOR == 0) {
     s->printAllSensors();
