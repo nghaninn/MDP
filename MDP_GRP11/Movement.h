@@ -1,25 +1,11 @@
 #include "Motor.h"
 
 static const int Distance_5CM = 140;
-const int d10 = 275;//245;//278;
-const int d20 = d10 * 2.12;
-const int d30 = d10 * 3.23;
-const int d40 = 1100;
-const int d50 = 1375;
-const int d60 = 1650;
-const int d70 = 1925;
-const int d80 = 2200;
-const int d90 = 2475;
-const int d100 = 2750;
-const int d110 = 3025;
-const int d120 = 3300;
-const int d130 = 3575;
-const int d140 = 3850;
-const int d150 = 4125;
-const int d160 = 4400;
-const int d170 = 4675;
-const int d180 = 4950;//5004;//2500;//
+const int Distance_10CM = 275;//245;//278;
+const int Distance_20CM = Distance_10CM * 2.12;
+const int Distance_30CM = Distance_10CM * 3.23;
 static const int Distance_MAX = 3575;
+const int d180 = 4750;//5004;//2500;//
 const int d180_stop = 5004;
 
 static const int Rotate_45deg = 185;

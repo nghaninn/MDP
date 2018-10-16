@@ -56,7 +56,7 @@ void Movement::moveFront(double distance) {
   }
 
   brake();
-  //  delay(100);
+//  delay(100);
 }
 
 void Movement::moveReverse(double distance) {
@@ -74,16 +74,16 @@ void Movement::moveReverse(double distance) {
     if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   }
   brake();
-  //  delay(100);
+//  delay(100);
 }
 
 double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
-  //  kp = 7.9;
-  //  ki = 0.45;
-  //  kd = 0.38;
-
+//  kp = 7.9;
+//  ki = 0.45;
+//  kd = 0.38;
+  
   error = motor->getM1Ticks() - motor->getM2Ticks();
   this->integral += error;
   p = kp * error;
@@ -93,7 +93,7 @@ double Movement::computePID() {
   PrevTicks = error;
 
   return pid;
-  //  return 0;
+//  return 0;
 }
 
 /* ================================================================================================================================================================
@@ -114,38 +114,8 @@ void Movement::move(int forward) {
     moveFront20CM();
   else if (forward == 3)
     moveFront30CM();
-  else if (forward == 4)
-    moveFront(d40);
-  else if (forward == 5)
-    moveFront(d50);
-  else if (forward == 6)
-    moveFront(d60);
-  else if (forward == 7)
-    moveFront30CM();
-  else if (forward == 8)
-    moveFront30CM();
-  else if (forward == 9)
-    moveFront30CM();
-  else if (forward == 10)
-    moveFront30CM();
-  else if (forward == 11)
-    moveFront30CM();
-  else if (forward == 12)
-    moveFront30CM();
-  else if (forward == 13)
-    moveFront30CM();
-  else if (forward == 14)
-    moveFront30CM();
-  else if (forward == 15)
-    moveFront30CM();
-  else if (forward == 16)
-    moveFront30CM();
-  else if (forward == 17)
-    moveFront30CM();
-  else if (forward == 18)
-    moveFront30CM();
   else
-    move(d180);
+    moveFront10CM();
 }
 
 void Movement::moveFront5CM() {
@@ -153,15 +123,15 @@ void Movement::moveFront5CM() {
 }
 
 void Movement::moveFront10CM() {
-  moveFrontShort(d10);
+  moveFrontShort(Distance_10CM);
 }
 
 void Movement::moveFront20CM() {
-  moveFrontShort(d20);
+  moveFrontShort(Distance_20CM);
 }
 
 void Movement::moveFront30CM() {
-  moveFrontShort(d30);
+  moveFrontShort(Distance_30CM);
 }
 
 int delayTime = 10;
@@ -226,7 +196,7 @@ void Movement::moveFrontShort(int distance) {
   brake();
   if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
-  //  delay(100);
+//  delay(100);
 }
 
 
@@ -291,7 +261,7 @@ void Movement::rotate(int degree, boolean isRight) {
       rotate(360, Rotate_360deg, isRight);
       degree -= 360;
     }
-    //    delay (100);
+//    delay (100);
   }
 }
 
@@ -325,7 +295,7 @@ void Movement::rotate(int degree, double distance, boolean isRight) {
   brake();
   if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
-  //  delay(100);
+//  delay(100);
 }
 
 int Movement::computePID_right(int angle) {

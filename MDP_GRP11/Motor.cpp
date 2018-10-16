@@ -2,8 +2,8 @@
 
 
 Motor::Motor() {
-  M1Ticks = 0;
-  M1Ticks = 0;
+  M1Ticks=0;
+  M1Ticks=0;
   md.init();
 }
 
