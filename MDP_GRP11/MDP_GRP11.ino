@@ -13,7 +13,6 @@ Motor *motor;
 Sensor *s;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   enableInterrupt(Motor::M1A, motor1, RISING);
   enableInterrupt(Motor::M2A, motor2, RISING);
