@@ -6,12 +6,15 @@
 String commands = "";
 String pre_command = "";
 
-bool isFastestPath = false;
-
 Movement *move;
 Calib *cal;
 Motor *motor;
 Sensor *s;
+
+bool AUTO_SELF_CALIB = true;
+bool CALIB_SENSORS_PRINTVALUES = false;
+bool ONLY_FIRST_SENSOR = false;
+static int ALREADY_SENT_OUT_SENSOR = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -59,9 +62,9 @@ void loop() {
 
   executeCommand(commands);
 
-  //  while (Serial.available()) {
-  //    Serial.read(); //flush out all command while execution;
-  //  }
+//  while (Serial.available()) {
+//    Serial.read(); //flush out all command while execution;
+//  }
 
   pre_command = commands;
   commands = "";
@@ -100,7 +103,6 @@ bool executeCommand(String command) {
   String sub_command;
 
   while ((sub_command = getSubString(&command, ',')).length()) {
-
     while (cal->isCalibrating);
 
     if (DEBUG) Serial.println("-Received Command: " + String(sub_command));
@@ -111,17 +113,17 @@ bool executeCommand(String command) {
     } else if (sub_command.charAt(0) == 'L' || sub_command.charAt(0) == 'l') {
       if (DEBUG) Serial.println("L");
       move->rotateL(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+      if (AUTO_SELF_CALIB)
         cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
       if (DEBUG) Serial.println("R");
       move->rotate(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+      if (AUTO_SELF_CALIB)
         cal->selfCalib(false);
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
       if (DEBUG) Serial.println("C");
       if (sub_command.charAt(1) == '1') {
-        if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+        if (AUTO_SELF_CALIB)
           cal->selfCalib();
       } else if (sub_command.charAt(1) == '2')
         cal->calibFront();
@@ -132,7 +134,7 @@ bool executeCommand(String command) {
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
       if (DEBUG) Serial.println("U");
       move->rotate(180);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+      if (AUTO_SELF_CALIB)
         cal->selfCalib(false);
     } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's')) {
       if (DEBUG) Serial.println("S");
@@ -156,63 +158,28 @@ bool executeCommand(String command) {
     } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'm') {
       if (DEBUG) Serial.println("M");
       if (sub_command.charAt(1) == '1') {
-        if (sub_command.charAt(2) == '0') {
-          move->move(10);
-        } else if (sub_command.charAt(2) == '1') {
-          move->move(11);
-        } else if (sub_command.charAt(2) == '2') {
-          move->move(12);
-        } else if (sub_command.charAt(2) == '3') {
-          move->move(13);
-        } else if (sub_command.charAt(2) == '4') {
-          move->move(14);
-        } else if (sub_command.charAt(2) == '5') {
-          move->move(15);
-        } else if (sub_command.charAt(2) == '6') {
-          move->move(16);
-        } else if (sub_command.charAt(2) == '7') {
-          move->move(17);
-        } else if (sub_command.charAt(2) == '8') {
-          move->move(18);
-        } else {
-          move->move(1);
-          delay(50);
-        }
+        move->move(1);
+        delay(300);
       } else if (sub_command.charAt(1) == '2') {
         move->move(2);
-      } else if (sub_command.charAt(1) == '3') {
+      } else if (sub_command.charAt(1) == '3')
         move->move(3);
-      } else if (sub_command.charAt(1) == '4') {
-        move->move(4);
-      } else if (sub_command.charAt(1) == '5') {
-        move->move(5);
-      } else if (sub_command.charAt(1) == '6') {
-        move->move(6);
-      } else if (sub_command.charAt(1) == '7') {
-        move->move(7);
-      } else if (sub_command.charAt(1) == '8') {
-        move->move(8);
-      } else if (sub_command.charAt(1) == '9') {
-        move->move(9);
-      } else
+      else
         move->move(1);
+      //        move->moveSmall(-90);
 
       if (AUTO_SELF_CALIB)
         cal->selfCalib();
     } else if (sub_command.charAt(0) == 'z') {
+      //      if (DEBUG) Serial.println("z");
+      //      if (sub_command.charAt(1) == 'b')
       move->newBatt();
-    } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'f') {
-      //RUNNING FASTEST
+      //      }
     }
   }
+  delay(150);
 
-  if(isFastestPath) {
-    delay(100);
-  } else
-    delay(50);
-  
-  LEFT_CAL_COUNT++;
-  if (ALREADY_SENT_OUT_SENSOR == 0 && !isFastestPath) {
+  if (ALREADY_SENT_OUT_SENSOR == 0) {
     s->printAllSensors();
     ALREADY_SENT_OUT_SENSOR++;
   }

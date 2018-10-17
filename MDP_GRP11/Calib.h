@@ -1,8 +1,6 @@
 #include "Movement.h"
 #include "Sensor.h"
 
-static int SELF_LEFTWALL_CALIB_COUNTER;
-
 class Calib {
   private:
     bool selfCalibNeeded;
@@ -16,6 +14,7 @@ class Calib {
     bool isCalibrating;
     Calib();
     Movement *mov;
+    void needSelfCalib();
     void selfCalib();
     void selfCalib(bool multipleLevel);
     void calib();
