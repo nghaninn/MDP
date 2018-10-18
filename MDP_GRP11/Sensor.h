@@ -7,17 +7,17 @@
 #define ir5 A4 //LF
 #define ir6 A5 //LB
 
-static const int sFL_o []PROGMEM = {103, 214, 347, 479};
-static const int sFM_o []PROGMEM = {105, 186, 313, 506};
-static const int sFR_o []PROGMEM = {107, 211, 328, 454};
+static const int sFL_o []PROGMEM = {104, 214, 347, 479};
+static const int sFM_o []PROGMEM = {82, 186, 313, 506};
+static const int sFR_o []PROGMEM = {103, 211, 328, 454};
 static const int sLF_o []PROGMEM = {140, 254, 375, 522};//{105, 218, 334, 442};
 static const int sLB_o []PROGMEM = {119, 242, 367, 462};//{114, 236, 356, 445};
 static const int sR_o  []PROGMEM = {186, 235, 331, 443, 567, 678};//{185, 231, 331, 443, 567, 683};
 
 //With 25% leeway of next distance
-static const int sFL []PROGMEM = {131, 247, 380, 520};
-static const int sFM []PROGMEM = {125, 218, 361, 538};
-static const int sFR []PROGMEM = {133, 240, 360, 485};
+static const int sFL []PROGMEM = {139, 247, 378, 512};
+static const int sFM []PROGMEM = {114, 213, 325, 455};
+static const int sFR []PROGMEM = {137, 240, 357, 470};
 static const int sLF []PROGMEM = {168, 282, 407, 575};//{133, 246, 357, 469};
 static const int sLB []PROGMEM = {150, 271, 384, 478};//{145, 266, 376, 463};
 static const int sR  []PROGMEM = {198, 257, 358, 474, 595, 708};//{196, 256, 358, 473, 593, 708};
@@ -31,7 +31,7 @@ static const int sFL_Limit []PROGMEM = {71, 167, 101};
 static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
 static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 
-static const int LB_Calib_Offset = -10;
+static const int LB_Calib_Offset = -8;
 
 //int rFL, rFM, rFR, rLF, rLB, rR;
 //int oFL, oFM, oFR, oLF, oLB, oR;

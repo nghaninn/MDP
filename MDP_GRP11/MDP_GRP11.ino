@@ -3,7 +3,7 @@
 #include "Global.h"
 
 //char commands;
-String commands = "";
+String commands = "";//"F,C,M6,R,M6,L,M8,R,M5,L,M3,R,M1,C";
 String pre_command = "";
 
 bool isFastestPath = false;
@@ -197,21 +197,25 @@ bool executeCommand(String command) {
       } else
         move->move(1);
 
-      if (AUTO_SELF_CALIB)
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
         cal->selfCalib();
     } else if (sub_command.charAt(0) == 'z') {
       move->newBatt();
-    } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'f') {
-      //RUNNING FASTEST
+    } else if (sub_command.charAt(0) == 'F' || sub_command.charAt(0) == 'f') {
+      isFastestPath = !isFastestPath;
+      AUTO_SELF_CALIB = !AUTO_SELF_CALIB;
+      ALREADY_SENT_OUT_SENSOR = 0;
+      //ACTIVIATE/DEACTIVATE FASTEST
     }
+
+    if (isFastestPath) {
+      delay(150);
+    } else
+      delay(50);
+
+    LEFT_CAL_COUNT++;
   }
 
-  if(isFastestPath) {
-    delay(100);
-  } else
-    delay(50);
-  
-  LEFT_CAL_COUNT++;
   if (ALREADY_SENT_OUT_SENSOR == 0 && !isFastestPath) {
     s->printAllSensors();
     ALREADY_SENT_OUT_SENSOR++;
