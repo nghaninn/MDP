@@ -28,7 +28,7 @@ void Sensor::detectAll() {
   while (i++ < 2200) {//1) { //
     readObstacle();
     //    if (DEBUG_SENSOR) Serial.println("------------------------------FL:" + String(oFL) + " | FM:" + String(oFM) + " | FR:" + String(oFR) + " | LF:" + String(oLF) + " | LB:" + String(oLB) + " | R:" + String(oR));
-    Serial.println("");
+    if(DEBUG_SENSOR) Serial.println("");
   }
 }
 
@@ -145,12 +145,35 @@ bool Sensor::hasObstacleForCalib() {
 int Sensor::hasObstacleForSelfCalib() {
   readSensorRawValues();
 
-  if (DEBUG_SENSOR) Serial.println(String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | " );
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println(String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | " );
 
   oLF = rLF < sLF[0] ? gShort[0] : rLF < sLF[1] ? gShort[1] : rLF < sLF[2] ? gShort[2] : rLF < sLF[3] ? gShort[3] : gShort[4];
   oLB = rLB < sLB[0] ? gShort[0] : rLB < sLB[1] ? gShort[1] : rLB < sLB[2] ? gShort[2] : rLB < sLB[3] ? gShort[3] : gShort[4];
 
-  if (DEBUG_SENSOR) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
+
+  if (oLF != oLB)
+    return 0;
+
+//  if ((oLF < gShort[2] && rLF > sLF_Limit[3]) || (oLB < gShort[2] && rLB > sLB_Limit[3]) ||
+//      (oLF == gShort[0] && rLF < sLF_Limit[2]) || (oLB == gShort[0] && rLB < sLB_Limit[2]))
+//    return 2;
+//  else 
+  if (oLF < gShort[1] || oLB < gShort[1])//(*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
+    return 1;
+
+  return 0;
+}
+
+int Sensor::hasObstacleForLeftCalib() {
+  readSensorRawValues();
+
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println(String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | " );
+
+  oLF = rLF < sLF[0] ? gShort[0] : rLF < sLF[1] ? gShort[1] : rLF < sLF[2] ? gShort[2] : rLF < sLF[3] ? gShort[3] : gShort[4];
+  oLB = rLB < sLB[0] ? gShort[0] : rLB < sLB[1] ? gShort[1] : rLB < sLB[2] ? gShort[2] : rLB < sLB[3] ? gShort[3] : gShort[4];
+
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println("hasObsForSelfCal: " + String(oLF) + " | " + String(oLB));
 
   if (oLF != oLB)
     return 0;
@@ -158,8 +181,6 @@ int Sensor::hasObstacleForSelfCalib() {
   if ((oLF < gShort[2] && rLF > sLF_Limit[3]) || (oLB < gShort[2] && rLB > sLB_Limit[3]) ||
       (oLF == gShort[0] && rLF < sLF_Limit[2]) || (oLB == gShort[0] && rLB < sLB_Limit[2]))
     return 2;
-  else if (oLF < gShort[1] || oLB < gShort[1])//(*rLF < (sLF[1] * 0.75)) && (*rLB < (sLB[1] * 0.75)))
-    return 1;
 
   return 0;
 }
@@ -345,6 +366,8 @@ void Sensor::printAllSensors() {
   //  Serial.println("a" + String(oLF) + "," + String(oLB) + "," + String(oFL) + "," + String(oFR) + "," + String(oFM) + "," + String(oR));
 
   readObstacle();
+  int i = 0;
+  
   if (SENSOR_STABILITY_TEST) {
     aFL[0] = oFL; aFM[0] = oFM; aFR[0] = oFR; aLF[0] = oLF; aLB[0] = oLB; aR[0] = oR;
     readObstacle();
@@ -365,40 +388,58 @@ void Sensor::printAllSensors() {
       sensorCorrection = false;
       if (DEBUG_SENSOR) Serial.println("\nSensor Reading Loop: " + String(i));
 
-      if (aFL[2] - aFL[0] > 1 && aFL[0] != aFL[1]) {
+      if (aFL[2] != aFL[0] && aFL[0] != aFL[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FL | " + String(aFL[2]) + " - " + String(aFL[0]));
         readFrontLeftObstacle();
-        aFL[2] = oFL;
+        if(aFL[0] == aFL[1])
+          aFL[2] = oFL;
+        else 
+          aFL[0] = oFL;
         sensorCorrection = true;
       }
-      if (aFM[2] - aFM[0] > 1 && aFM[0] != aFM[1]) {
+      if (aFM[2] != aFM[0] && aFM[0] != aFM[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FM | " + String(aFM[2]) + " - " + String(aFM[0]));
         readFrontMidObstacle();
-        aFM[2] = oFM;
+        if(aFM[0] == aFM[1])
+          aFM[2] = oFM;
+        else 
+          aFM[0] = oFM;
         sensorCorrection = true;
       }
-      if (aFR[2] - aFR[0] > 1 && aFR[0] != aFR[1]) {
+      if (aFR[2] != aFR[0] && aFR[0] != aFR[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh FR | " + String(aFR[2]) + " - " + String(aFR[0]));
         readFrontRightObstacle();
-        aFR[2] = oFR;
+        if(aFR[0] == aFR[1])
+          aFR[2] = oFR;
+        else 
+          aFR[0] = oFR;
         sensorCorrection = true;
       }
-      if (aLF[2] - aLF[0] > 1 && aLF[0] != aLF[1]) {
+      if (aLF[2] != aLF[0] && aLF[0] != aLF[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh LF | " + String(aLF[2]) + " - " + String(aLF[0]));
         readLeftFrontObstacle();
-        aLF[2] = oLF;
+        if(aLF[0] == aLF[1])
+          aLF[2] = oLF;
+        else 
+          aLF[0] = oLF;
         sensorCorrection = true;
       }
-      if (aLB[2] - aLB[0] > 1 && aLB[0] != aLB[1]) {
+      if (aLB[2] != aLB[0] && aLB[0] != aLB[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh LB | " + String(aLB[2]) + " - " + String(aLB[0]));
         readLeftBackObstacle();
-        aLB[2] = oLB;
+        if(aFL[0] == aFL[1])
+          aLB[2] = oLB;
+        else 
+          aLB[0] = oLB;
         sensorCorrection = true;
       }
-      if (aR[2] - aR[0] > 1 && aR[0] != aR[1]) {
+      if (aR[2] != aR[0] && aR[0] != aR[1]) {
         if (DEBUG_SENSOR) Serial.println("\nRefresh R | " + String(aR[2]) + " - " + String(aR[0]));
         readRightObstacle();
-        aR[2] = oR;
+        if(aFL[0] == aFL[1])
+          aR[2] = oR;
+        else 
+          aR[0] = oR;
         sensorCorrection = true;
       }
 
@@ -408,7 +449,7 @@ void Sensor::printAllSensors() {
       mergeSort(aLF, 0, 2);
       mergeSort(aLB, 0, 2);
       mergeSort(aR, 0, 2);
-    } while (sensorCorrection && (i++ < 3));
+    } while (sensorCorrection && (i++ < 7));
 
     if (DEBUG_SENSOR) Serial.println("\na" + String(aLF[0]) + "," + String(aLB[0]) + "," + String(aFL[0]) + "," + String(aFR[0]) + "," + String(aFM[0]) + "," + String(aR[0]));
     if (i > 5) {
