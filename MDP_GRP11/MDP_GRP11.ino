@@ -196,17 +196,17 @@ bool executeCommand(String command) {
       } else
         move->move(1);
 
-      if (AUTO_SELF_CALIB)
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
         cal->selfCalib();
     } else if (sub_command.charAt(0) == 'z') {
       move->newBatt();
-    } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'f') {
-      //RUNNING FASTEST
+    } else if (sub_command.charAt(0) == 'F' || sub_command.charAt(0) == 'f') {
+      isFastestPath = true;
     }
   }
 
   if(isFastestPath) {
-    delay(100);
+    delay(150);
   } else
     delay(50);
   
