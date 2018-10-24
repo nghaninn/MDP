@@ -105,11 +105,11 @@ void Movement::moveReverse(double distance) {
 double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
-  kp = 5;
+  kp = 0;
   ki = 0;
   kd = 0;
 
-//250 setseppd
+//250 setspeed
 //  kp = 8.4;//7.9;
 //  ki = 0.49;//0.45;
 //  kd = 0.33;//0.38;
