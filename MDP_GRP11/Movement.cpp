@@ -105,9 +105,11 @@ void Movement::moveReverse(double distance) {
 double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
-  kp = 8.4;//7.9;
-  ki = 0.49;//0.45;
-  kd = 0.33;//0.38;
+// 250: p:8.4 i:0.49 d:0.33
+
+  kp = 0;//8.4;//7.9;
+  ki = 0;//0.49;//0.45;
+  kd = 0;//0.33;//0.38;
 
 //  kp = 7.9;
 //  ki = 0.46;

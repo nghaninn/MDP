@@ -30,8 +30,8 @@ const int Rotate_180deg = 793;//Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
 
-const int MSpeed = 250;
-const int MSpeedR = 150;
+const int MSpeed = 350;
+const int MSpeedR = 300;
 const int MSpeedC = 150;
 const int offset = 0;//-10; //M1 Speed offset (Going abt 20pwm faster)
 
