@@ -172,8 +172,8 @@ bool executeCommand(String command) {
           move->move(16);
         } else if (sub_command.charAt(2) == '7') {
           move->move(17);
-        } else if (sub_command.charAt(2) == '8') {
-          move->move(18);
+//        } else if (sub_command.charAt(2) == '8') {
+//          move->move(18);
         } else {
           move->move(1);
           delay(50);

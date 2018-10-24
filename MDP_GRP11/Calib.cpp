@@ -100,6 +100,7 @@ void Calib::calib() {
 
       sensor->readLeftSensorRawValues();
       calibWallL();
+      LEFT_CAL_COUNT = 0;
     }
   }
 
@@ -107,7 +108,6 @@ void Calib::calib() {
   if (DEBUG_CALIB) Serial.println("ENDING SENSOR READING " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
 
   isCalibrating = false;
-  LEFT_CAL_COUNT = 0;
 }
 
 void Calib::calibFront() {
