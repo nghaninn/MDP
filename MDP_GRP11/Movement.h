@@ -24,7 +24,7 @@ static const int Distance_MAX = d120;
 const int d180_stop = 5004;
 
 static const int Rotate_45deg = 185;
-const int Rotate_90deg = 395;//385;//357;
+const int Rotate_90deg = 360;//385;//357;
 const int L_offset = -1;//385;//357;
 const int Rotate_180deg = 793;//Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
