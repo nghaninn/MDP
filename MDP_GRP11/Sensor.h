@@ -7,35 +7,28 @@
 #define ir5 A4 //LF
 #define ir6 A5 //LB
 
-static const int sFL_o []PROGMEM = {104, 214, 347, 479};
-static const int sFM_o []PROGMEM = {82, 186, 313, 506};
-static const int sFR_o []PROGMEM = {103, 211, 328, 454};
-static const int sLF_o []PROGMEM = {140, 254, 375, 522};//{105, 218, 334, 442};
-static const int sLB_o []PROGMEM = {119, 242, 367, 462};//{114, 236, 356, 445};
-static const int sR_o  []PROGMEM = {186, 235, 331, 443, 567, 678};//{185, 231, 331, 443, 567, 683};
+static const int sFL_o []PROGMEM = {102, 214, 347, 479};
+static const int sFM_o []PROGMEM = {79, 186, 313, 506};
+static const int sFR_o []PROGMEM = {101, 211, 328, 454};
+static const int sLF_o []PROGMEM = {105, 218, 334, 442};
+static const int sLB_o []PROGMEM = {114, 236, 356, 445};
+static const int sR_o  []PROGMEM = {185, 231, 331, 443, 567, 683};
 
 //With 25% leeway of next distance
-static const int sFL []PROGMEM = {139, 247, 378, 512};
-static const int sFM []PROGMEM = {114, 213, 325, 455};
-static const int sFR []PROGMEM = {137, 240, 357, 470};
-static const int sLF []PROGMEM = {168, 282, 407, 575};//{133, 246, 357, 469};
-static const int sLB []PROGMEM = {150, 271, 384, 478};//{145, 266, 376, 463};
-static const int sR  []PROGMEM = {198, 257, 358, 474, 595, 708};//{196, 256, 358, 473, 593, 708};
+static const int sFL []PROGMEM = {130, 247, 378, 512};
+static const int sFM []PROGMEM = {106, 213, 325, 455};
+static const int sFR []PROGMEM = {128, 240, 357, 470};
+static const int sLF []PROGMEM = {133, 246, 357, 469};
+static const int sLB []PROGMEM = {145, 266, 376, 463};
+static const int sR  []PROGMEM = {196, 256, 358, 473, 593, 708};
 
-static const int sLF_Limit []PROGMEM = {75, 176, 109, 152}; // extreme Lower limit (touch front of robot), extreme upper limit (till end of 3 grid), lower limit to retreat, upper limit to move forward;
-static const int sLB_Limit []PROGMEM = {69, 161, 96, 137};
-
-static const int sFL_Limit []PROGMEM = {93, 157, 111}; //95 - 71 
-static const int sFM_Limit []PROGMEM = {72, 127, 88};
-static const int sFR_Limit []PROGMEM = {93, 151, 113};
+static const int sLF_Limit []PROGMEM = {71, 163, 93, 128}; // extreme Lower limit, extreme upper limit;
+static const int sLB_Limit []PROGMEM = {70, 176, 96, 128};
 
 static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
 static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 
-static const int LB_Calib_Offset = -8;
-static const int FLFR_Calib_Offset = 0;
-static const int FMFR_Calib_Offset = 2;
-static const int FMFL_Calib_Offset = 2;
+static const int LB_Calib_Offset = 0;
 
 //int rFL, rFM, rFR, rLF, rLB, rR;
 //int oFL, oFM, oFR, oLF, oLB, oR;
@@ -73,8 +66,6 @@ class Sensor {
     void readRightSensorRawValues();
     bool hasObstacleForCalib();
     int hasObstacleForSelfCalib();
-    int hasObstacleForSelfCalib_Front();
-    int hasObstacleForLeftCalib();
     void printAllSensors();
     void printAllSensorsRAW();
 };
