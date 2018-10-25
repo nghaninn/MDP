@@ -11,6 +11,8 @@ class Calib {
     void calibForward(bool limitedFront);
     void calibWallF();
     void calibWallL();
+    void calibWallFront_L();
+    void calibWallFront_R();
     void calibDelay();
   public:
     bool isCalibrating;
@@ -18,6 +20,7 @@ class Calib {
     Movement *mov;
     void selfCalib();
     void selfCalib(bool multipleLevel);
+    void selfCalibFront();
     void calib();
     void calibFront();
     void calibLeft();

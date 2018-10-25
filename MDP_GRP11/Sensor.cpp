@@ -165,6 +165,28 @@ int Sensor::hasObstacleForSelfCalib() {
   return 0;
 }
 
+int Sensor::hasObstacleForSelfCalib_Front() {
+  readSensorRawValues();
+
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println(String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | " );
+
+  oFL = rFL < sFL[0] ? gShort[0] : rFL < sFL[1] ? gShort[1] : rFL < sFL[2] ? gShort[2] : rFL < sFL[3] ? gShort[3] : gShort[4];
+  oFR = rFR < sFR[0] ? gShort[0] : rFR < sFR[1] ? gShort[1] : rFR < sFR[2] ? gShort[2] : rFR < sFR[3] ? gShort[3] : gShort[4];
+  oFM = rFM < sFM[0] ? gShort[0] : rFM < sFM[1] ? gShort[1] : rFM < sFM[2] ? gShort[2] : rFM < sFM[3] ? gShort[3] : gShort[4];
+
+  if (DEBUG_SENSOR || DEBUG_CALIB) Serial.println("hasObstacleForSelfCalib_Front: " + String(oFL) + " | " + String(oFM) + " | " + String(oFR));
+
+  if(oFM > gShort[0] || rFM < sFM_Limit[0])
+    return 0;
+
+  if (oFM == gShort[0] && oFR == gShort[0])
+    return 2; //Front Right and Mid
+  else if (oFM == gShort[0] && oFL == gShort[0])
+    return 1; //Front Left and Mid
+    
+  return 0;
+}
+
 int Sensor::hasObstacleForLeftCalib() {
   readSensorRawValues();
 

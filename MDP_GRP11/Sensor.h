@@ -25,13 +25,17 @@ static const int sR  []PROGMEM = {198, 257, 358, 474, 595, 708};//{196, 256, 358
 static const int sLF_Limit []PROGMEM = {75, 176, 109, 152}; // extreme Lower limit (touch front of robot), extreme upper limit (till end of 3 grid), lower limit to retreat, upper limit to move forward;
 static const int sLB_Limit []PROGMEM = {69, 161, 96, 137};
 
-static const int sFR_Limit []PROGMEM = {71, 166, 100};
-static const int sFL_Limit []PROGMEM = {71, 167, 101};
+static const int sFL_Limit []PROGMEM = {93, 157, 111}; //95 - 71 
+static const int sFM_Limit []PROGMEM = {72, 127, 88};
+static const int sFR_Limit []PROGMEM = {93, 151, 113};
 
 static const int gShort []PROGMEM = {1, 2, 3, 4, 100};
 static const int gLong  []PROGMEM = {2, 3, 4, 5, 6, 7, 100};
 
 static const int LB_Calib_Offset = -8;
+static const int FLFR_Calib_Offset = 0;
+static const int FMFR_Calib_Offset = 2;
+static const int FMFL_Calib_Offset = 2;
 
 //int rFL, rFM, rFR, rLF, rLB, rR;
 //int oFL, oFM, oFR, oLF, oLB, oR;
@@ -69,6 +73,7 @@ class Sensor {
     void readRightSensorRawValues();
     bool hasObstacleForCalib();
     int hasObstacleForSelfCalib();
+    int hasObstacleForSelfCalib_Front();
     int hasObstacleForLeftCalib();
     void printAllSensors();
     void printAllSensorsRAW();

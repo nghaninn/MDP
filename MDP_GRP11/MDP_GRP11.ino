@@ -111,29 +111,31 @@ bool executeCommand(String command) {
     } else if (sub_command.charAt(0) == 'L' || sub_command.charAt(0) == 'l') {
       if (DEBUG) Serial.println("L");
       move->rotateL(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
       if (DEBUG) Serial.println("R");
       move->rotate(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
       if (DEBUG) Serial.println("C");
       if (sub_command.charAt(1) == '1') {
-        if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+        if (LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
           cal->selfCalib();
       } else if (sub_command.charAt(1) == '2')
         cal->calibFront();
       else if (sub_command.charAt(1) == '3')
         cal->calibLeft();
+      else if (sub_command.charAt(1) == '4')
+        cal->selfCalibFront();
       else
         cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
       if (DEBUG) Serial.println("U");
       move->rotate(180);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's')) {
       if (DEBUG) Serial.println("S");
       if (sub_command.charAt(1) == '1') {
@@ -197,7 +199,7 @@ bool executeCommand(String command) {
       } else
         move->move(1);
 
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
         cal->selfCalib();
     } else if (sub_command.charAt(0) == 'z') {
       move->newBatt();
