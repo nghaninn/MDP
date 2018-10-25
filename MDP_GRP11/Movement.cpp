@@ -19,6 +19,8 @@ void Movement::brake() {
 */
 
 void Movement::moveFront(double distance) {
+  if (DEBUG_MOVEMENT) Serial.println("moveFrontShort()" + String(distance));
+
   double pid;
   this->integral = 0;
   PrevTicks = 0;
@@ -28,35 +30,58 @@ void Movement::moveFront(double distance) {
 
   for (int i = 0; i < MSpeed; i += 50) {
     pid = computePID();
-    M1setSpeed = -(i + offset - pid);
+    M1setSpeed = -(i - pid);
     M2setSpeed = -(i + pid);
     md.setSpeeds (M1setSpeed, M2setSpeed);
-    if (DEBUG_MOVEMENT) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
-    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
-    delay(10);
+    //    if (DEBUG_MOVEMENT) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+    //    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+    //    if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
+    delay(delayTime);
   }
 
-  while (motor->getM1Ticks() < distance) {
+  while (motor->getM1Ticks() < max(distance * 0.9, distance - 50)) {
     pid = computePID();
     M1setSpeed = -(MSpeed + offset - pid);
     M2setSpeed = -(MSpeed + pid);
     md.setSpeeds (M1setSpeed, M2setSpeed);
-    if (DEBUG_MOVEMENT) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
-    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+    //    if (DEBUG_MOVEMENT) Serial.println("M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+    //    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+    //    if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
+    delay(delayTime);
   }
+  
+  if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+  if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
 
-  for (int i = 50; (abs(M1setSpeed) > 100); i += 50) {
+  int i;
+  for (i = 100; (motor->getM1Ticks() < distance && i < MSpeed); i += 50) {
     pid = computePID();
-    M1setSpeed = -(MSpeed + offset - pid - i);
+    M1setSpeed = -(MSpeed - pid - i);
     M2setSpeed = -(MSpeed + pid - i);
     md.setSpeeds (M1setSpeed, M2setSpeed);
-    if (DEBUG_MOVEMENT) Serial.println("Decrement - M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
-    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
-    delay(10);
+    //    if (DEBUG_MOVEMENT) Serial.println("Decrement - M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+    //    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+    //    if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
+    delay(delayTime);
+  }
+  
+  if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+  if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
+
+  while (motor->getM1Ticks() < distance) {
+    pid = computePID();
+    M1setSpeed = -(MSpeed - pid - i + 50);
+    M2setSpeed = -(MSpeed + pid - i + 50);
+    md.setSpeeds (M1setSpeed, M2setSpeed);
+    //    if (DEBUG_MOVEMENT) Serial.println("Decrement - M1setSpeed: " + String(int(M1setSpeed)) + ", M2setSpeed: " + String(int(M2setSpeed)));
+    //    if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+    //    if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
+    delay(delayTime);
   }
 
   brake();
-//  delay(100);
+  if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
+  if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
 }
 
 void Movement::moveReverse(double distance) {
@@ -80,10 +105,19 @@ void Movement::moveReverse(double distance) {
 double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
+  kp = 8;
+  ki = 0.34;//0.35;
+  kd = 0.32;//.5;
+
+//250 setspeed
+//  kp = 8.4;//7.9;
+//  ki = 0.49;//0.45;
+//  kd = 0.33;//0.38;
+
 //  kp = 7.9;
-//  ki = 0.45;
+//  ki = 0.46;
 //  kd = 0.38;
-  
+
   error = motor->getM1Ticks() - motor->getM2Ticks();
   this->integral += error;
   p = kp * error;
@@ -93,7 +127,6 @@ double Movement::computePID() {
   PrevTicks = error;
 
   return pid;
-//  return 0;
 }
 
 /* ================================================================================================================================================================
@@ -114,6 +147,36 @@ void Movement::move(int forward) {
     moveFront20CM();
   else if (forward == 3)
     moveFront30CM();
+  else if (forward == 4)
+    moveFrontShort(d40);
+  else if (forward == 5)
+    moveFrontShort(d50);
+  else if (forward == 6)
+    moveFront(d60);
+  else if (forward == 7)
+    moveFront(d70);
+  else if (forward == 8)
+    moveFront(d80);
+  else if (forward == 9)
+    moveFront(d90);
+  else if (forward == 10)
+    moveFront(d100);
+  else if (forward == 11)
+    moveFront(d110);
+  else if (forward == 12)
+    moveFront(d120);
+  else if (forward == 13)
+    moveFront(d130);
+  else if (forward == 14)
+    moveFront(d140);
+  else if (forward == 15)
+    moveFront(d150);
+  else if (forward == 16)
+    moveFront(d160);
+  else if (forward == 17)
+    moveFront(d170);
+//  else if (forward == 18)
+//    moveFront(d180);
   else
     moveFront10CM();
 }
@@ -123,18 +186,16 @@ void Movement::moveFront5CM() {
 }
 
 void Movement::moveFront10CM() {
-  moveFrontShort(Distance_10CM);
+  moveFrontShort(d10);
 }
 
 void Movement::moveFront20CM() {
-  moveFrontShort(Distance_20CM);
+  moveFrontShort(d20);
 }
 
 void Movement::moveFront30CM() {
-  moveFrontShort(Distance_30CM);
+  moveFrontShort(d30);
 }
-
-int delayTime = 10;
 
 void Movement::moveFrontShort(int distance) {
   if (DEBUG_MOVEMENT) Serial.println("moveFrontShort()" + String(distance));
@@ -168,6 +229,7 @@ void Movement::moveFrontShort(int distance) {
     delay(delayTime);
   }
 
+  if (DEBUG_MOVEMENT) Serial.println("[PID] " + String((int)pid) + " M1Ticks(" + String(motor->getM1Ticks()) + ") - M2Ticks(" + String(motor->getM2Ticks()) + ") = " + String(motor->getM1Ticks() - motor->getM2Ticks()));
   if (DEBUG_MOVEMENT) Serial.println("Total Error: " + String(integral));
 
   int i;
@@ -203,9 +265,15 @@ void Movement::moveFrontShort(int distance) {
 double Movement::computePIDShort() {
   double kp, ki, kd, p, i, d, pid, error;
 
-  kp = 7.9;
-  ki = 0.45;
-  kd = 0.38;
+  kp = 8;
+  ki = 0.34;//0.35;
+  kd = 0.32;//.5;
+
+//250 setspeed
+//  kp = 8.4;//7.9;
+//  ki = 0.49;//0.45;
+//  kd = 0.33;//0.38;
+
 
   error = motor->getM1Ticks() - motor->getM2Ticks();
   this->integral += error;
@@ -283,7 +351,7 @@ void Movement::rotate(int degree, double distance, boolean isRight) {
     }
   } else {
     while (motor->getM1Ticks() < distance + L_offset) {
-      pid = computePID_right(degree);
+      pid = computePID_left(degree);
       int M1setSpeed = (MSpeedR);
       int M2setSpeed = -(MSpeedR + pid);
       md.setSpeeds (M1setSpeed, M2setSpeed);
@@ -302,8 +370,34 @@ int Movement::computePID_right(int angle) {
   double kp, ki, kd, p, i, d, pid, error;
 
   kp = 18;
-  ki = 0.63;
-  kd = 0;
+  ki = 0.5;
+  kd = 0.3;
+
+//  kp = 18;
+//  ki = 0.63;
+//  kd = 0;
+
+  error = motor->getM1Ticks() - motor->getM2Ticks();
+  this->integral += error;
+  p = kp * error;
+  i = ki * this->integral;
+  d = kd * (error - PrevTicks);
+  pid = p + i + d;
+  PrevTicks = error;
+
+  return pid;
+}
+
+int Movement::computePID_left(int angle) {
+  double kp, ki, kd, p, i, d, pid, error;
+
+  kp = 12;
+  ki = 0.23;
+  kd = 0.28;
+
+//  kp = 18;
+//  ki = 0.63;
+//  kd = 0;
 
   error = motor->getM1Ticks() - motor->getM2Ticks();
   this->integral += error;

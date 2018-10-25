@@ -2,7 +2,8 @@
 #include "Calib.h"
 #include "Global.h"
 
-String commands = "";
+//char commands;
+String commands = "";//"F,C,M6,R,M6,L,M8,R,M5,L,M3,R,M1,C";
 String pre_command = "";
 
 bool isFastestPath = false;
@@ -13,6 +14,7 @@ Motor *motor;
 Sensor *s;
 
 void setup() {
+  // put your setup code here, to run once:
   Serial.begin(115200);
   enableInterrupt(Motor::M1A, motor1, RISING);
   enableInterrupt(Motor::M2A, motor2, RISING);
@@ -109,29 +111,31 @@ bool executeCommand(String command) {
     } else if (sub_command.charAt(0) == 'L' || sub_command.charAt(0) == 'l') {
       if (DEBUG) Serial.println("L");
       move->rotateL(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if (sub_command.charAt(0) == 'R' || sub_command.charAt(0) == 'r') {
       if (DEBUG) Serial.println("R");
       move->rotate(90);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if (sub_command.charAt(0) == 'C' || sub_command.charAt(0) == 'c') {
       if (DEBUG) Serial.println("C");
       if (sub_command.charAt(1) == '1') {
-        if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
+        if (LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
           cal->selfCalib();
       } else if (sub_command.charAt(1) == '2')
         cal->calibFront();
       else if (sub_command.charAt(1) == '3')
         cal->calibLeft();
+      else if (sub_command.charAt(1) == '4')
+        cal->selfCalibFront();
       else
         cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
       if (DEBUG) Serial.println("U");
       move->rotate(180);
-      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > 2)
-        cal->selfCalib(false);
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
+        cal->selfCalib(true);
     } else if ((sub_command.charAt(0) == 'S' || sub_command.charAt(0) == 's')) {
       if (DEBUG) Serial.println("S");
       if (sub_command.charAt(1) == '1') {
@@ -170,8 +174,8 @@ bool executeCommand(String command) {
           move->move(16);
         } else if (sub_command.charAt(2) == '7') {
           move->move(17);
-        } else if (sub_command.charAt(2) == '8') {
-          move->move(18);
+//        } else if (sub_command.charAt(2) == '8') {
+//          move->move(18);
         } else {
           move->move(1);
           delay(50);
@@ -195,21 +199,25 @@ bool executeCommand(String command) {
       } else
         move->move(1);
 
-      if (AUTO_SELF_CALIB)
+      if (AUTO_SELF_CALIB && LEFT_CAL_COUNT > LEFT_CAL_LIMIT)
         cal->selfCalib();
     } else if (sub_command.charAt(0) == 'z') {
       move->newBatt();
-    } else if (sub_command.charAt(0) == 'M' || sub_command.charAt(0) == 'f') {
-      //RUNNING FASTEST
+    } else if (sub_command.charAt(0) == 'F' || sub_command.charAt(0) == 'f') {
+      isFastestPath = !isFastestPath;
+      AUTO_SELF_CALIB = !AUTO_SELF_CALIB;
+      ALREADY_SENT_OUT_SENSOR = 0;
+      //ACTIVIATE/DEACTIVATE FASTEST
     }
+
+    if (isFastestPath) {
+      delay(150);
+    } else
+      delay(50);
+
+    LEFT_CAL_COUNT++;
   }
 
-  if(isFastestPath) {
-    delay(100);
-  } else
-    delay(50);
-  
-  LEFT_CAL_COUNT++;
   if (ALREADY_SENT_OUT_SENSOR == 0 && !isFastestPath) {
     s->printAllSensors();
     ALREADY_SENT_OUT_SENSOR++;
