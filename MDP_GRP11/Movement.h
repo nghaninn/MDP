@@ -24,14 +24,14 @@ static const int Distance_MAX = d120;
 const int d180_stop = 5004;
 
 static const int Rotate_45deg = 185;
-const int Rotate_90deg = 379;//385;//357;
-const int L_offset = -4;//385;//357;
+const int Rotate_90deg = 393;//379; (for 300)//385;//357;
+const int L_offset = 0;//-4; (for 300)//385;//357;
 const int Rotate_180deg = 793;//Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
 
 const int MSpeed = 350;
-const int MSpeedR = 300;
+const int MSpeedR = 200;
 const int MSpeedC = 150;
 const int offset = 0;//-10; //M1 Speed offset (Going abt 20pwm faster)
 

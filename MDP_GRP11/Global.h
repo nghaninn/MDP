@@ -10,6 +10,7 @@ static const bool DEBUG_MOVEMENT = false;
 static const bool DEBUG_CALIB = false;
 
 static bool AUTO_SELF_CALIB = true;
+static bool AUTO_SELF_CALIB_FRONT = false;
 static bool CALIB_SENSORS_PRINTVALUES = false;
 static int ALREADY_SENT_OUT_SENSOR = 0;
 static int LEFT_CAL_COUNT = 0;

@@ -128,7 +128,9 @@ bool executeCommand(String command) {
       else if (sub_command.charAt(1) == '3')
         cal->calibLeft();
       else if (sub_command.charAt(1) == '4')
-        cal->selfCalibFront();
+        cal->calibFrontLeft();
+      else if (sub_command.charAt(1) == '5')
+        cal->calibFrontRight();
       else
         cal->calib();
     } else if (sub_command.charAt(0) == 'U' || sub_command.charAt(0) == 'u') {
@@ -213,13 +215,13 @@ bool executeCommand(String command) {
     if (isFastestPath) {
       delay(150);
     } else
-      delay(50);
+      delay(150);
 
     LEFT_CAL_COUNT++;
   }
 
   if (ALREADY_SENT_OUT_SENSOR == 0 && !isFastestPath) {
-    s->printAllSensors();
+    if(!DEBUG) s->printAllSensors();
     ALREADY_SENT_OUT_SENSOR++;
   }
   if (DEBUG) Serial.println(String(ALREADY_SENT_OUT_SENSOR));

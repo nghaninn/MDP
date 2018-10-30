@@ -369,9 +369,14 @@ void Movement::rotate(int degree, double distance, boolean isRight) {
 int Movement::computePID_right(int angle) {
   double kp, ki, kd, p, i, d, pid, error;
 
-  kp = 18;
-  ki = 0.5;
-  kd = 0.3;
+  kp = 15;
+  ki = 0.83;
+  kd = 0.5;
+  
+//setspeed 300
+//  kp = 18;
+//  ki = 0.5;
+//  kd = 0.3;
 
 //  kp = 18;
 //  ki = 0.63;
@@ -391,9 +396,14 @@ int Movement::computePID_right(int angle) {
 int Movement::computePID_left(int angle) {
   double kp, ki, kd, p, i, d, pid, error;
 
-  kp = 12;
-  ki = 0.23;
-  kd = 0.28;
+  kp = 12.7;//8.4;
+  ki = 0.01;
+  kd = 0;
+  
+//setspeed 300
+//  kp = 12;
+//  ki = 0.23;
+//  kd = 0.28;
 
 //  kp = 18;
 //  ki = 0.63;

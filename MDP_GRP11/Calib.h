@@ -9,6 +9,7 @@ class Calib {
     Sensor *sensor;
     void calibForward();
     void calibForward(bool limitedFront);
+    void calibForward(bool limitedFront, bool onlyMid);
     void calibWallF();
     void calibWallL();
     void calibWallFront_L();
@@ -19,9 +20,11 @@ class Calib {
     Calib();
     Movement *mov;
     void selfCalib();
-    void selfCalib(bool multipleLevel);
+    void selfCalib(bool usingFront);
     void selfCalibFront();
     void calib();
     void calibFront();
+    void calibFrontLeft();
+    void calibFrontRight();
     void calibLeft();
 };

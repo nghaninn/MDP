@@ -30,8 +30,8 @@ void Calib::selfCalib(bool usingFront) {
 
     calibWallL();
     LEFT_CAL_COUNT = 0;
-  } else if (usingFront) {
-    if(DEBUG_CALIB) Serial.println("SELF CALIB USING FRONT");
+  } else if (usingFront && AUTO_SELF_CALIB_FRONT) {
+    if (DEBUG_CALIB) Serial.println("SELF CALIB USING FRONT");
     selfCalibFront();
   }
 
@@ -50,6 +50,28 @@ void Calib::selfCalibFront() {
 
     calibWallFront_R();
   }
+}
+
+void Calib::calibFrontLeft() {
+  isCalibrating = true;
+//  if (sensor->hasObstacleForSelfCalib_Front() == 1) {
+    if (DEBUG_CALIB) Serial.println("\nCALIB FRONT LEFT\n");
+
+    calibForward(true, true);
+    calibWallFront_L();
+//  }
+  isCalibrating = false;
+}
+
+void Calib::calibFrontRight() {
+  isCalibrating = true;
+//  if (sensor->hasObstacleForSelfCalib_Front() == 2) {
+    if (DEBUG_CALIB) Serial.println("\nCALIB FRONT RIGHT\n");
+
+    calibForward(true, true);
+    calibWallFront_R();
+//  }
+  isCalibrating = false;
 }
 
 void Calib::calibLeft() {
@@ -132,8 +154,8 @@ void Calib::calibFront() {
 
   if (DEBUG_CALIB) Serial.println("SELF CALIB LEVEL 2");
 
-    calibForward(false);
-    calibDelay();
+  calibForward(false);
+  calibDelay();
 
   calibWallF();
   isCalibrating = false;
@@ -141,22 +163,34 @@ void Calib::calibFront() {
 }
 
 void Calib::calibForward() {
-  calibForward(true);
+  calibForward(true, false);
 }
 
 void Calib::calibForward(bool limitedFront) {
+  calibForward(limitedFront, false);
+}
+
+void Calib::calibForward(bool limitedFront, bool onlyMid) {
   int i = 20;
   int distance = 0;
 
   sensor->readSensorRawValues();
   if (DEBUG_CALIB) Serial.println("Calib Forward: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
 
-  if ((rFM >= rFL || rFM >= rFR) && rFL < sFL_o[0] && rFM < sFM_o[0] && rFR < sFR_o[0]) {
-    if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
-    distance = -40;
-  } else if (rFM - sFM_o[0] > 8) {
-    if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
-    distance = (rFM - sFM_o[0]) * 2;
+  if (!onlyMid) {
+    if ((rFM >= rFL || rFM >= rFR) && rFL < sFL_o[0] && rFM < sFM_o[0] && rFR < sFR_o[0]) {
+      if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
+      distance = -40;
+    } else if (rFM - sFM_o[0] > 8) {
+      if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
+      distance = (rFM - sFM_o[0]) * 2;
+    }
+  } else {
+    if (rFM <= sFM_Limit[0]) {
+      distance = -1;
+    } else if (rFM > sFM_Limit[2]) {
+      distance = 1;
+    }
   }
 
   if (abs(distance) > 0) {
@@ -169,15 +203,23 @@ void Calib::calibForward(bool limitedFront) {
     sensor->readSensorRawValues();
     if (DEBUG_CALIB) Serial.println("Calib Forward: " + String(rFL) + " | " + String(rFM) + " | " + String(rFR) + " | " + String(rLF) + " | " + String(rLB) + " | " + String(rR) + " | DEFAULT: " + String(sFM[0]));
 
-    if (rFM >= rFL && rFM >= rFR && rFL < sFL_o[0] && rFM < sFM_o[0] && rFR < sFR_o[0]) {
-      if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
-      distance = -1;
-    } else if (rFM - sFM_o[0] > 2) {
-      if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
-      distance = 1;
-    } else if (rFM - sFM_o[0] < -2) {
-      if (DEBUG_CALIB) Serial.println("MOVE BACK");
-      distance = -1;
+    if (!onlyMid) {
+      if (rFM >= rFL && rFM >= rFR && rFL < sFL_o[0] && rFM < sFM_o[0] && rFR < sFR_o[0]) {
+        if (DEBUG_CALIB) Serial.println("MOVE BACK (AT WALL)");
+        distance = -1;
+      } else if (rFM - sFM_o[0] > 2) {
+        if (DEBUG_CALIB) Serial.println("MORE THAN 10mm");
+        distance = 1;
+      } else if (rFM - sFM_o[0] < -2) {
+        if (DEBUG_CALIB) Serial.println("MOVE BACK");
+        distance = -1;
+      }
+    } else {
+      if (rFM <= sFM_Limit[0]) {
+        distance = -1;
+      } else if (rFM > sFM_Limit[2]) {
+        distance = 1;
+      }
     }
 
     if (abs(distance) > 0) {
