@@ -1,7 +1,7 @@
 #include "Motor.h"
 
 static const int Distance_5CM = 140;
-const int d10 = 265;//245;//278;
+const int d10 = 258;//245;//278;
 const int d20 = 563;
 const int d30 = 868;
 const int d40 = 1178;
@@ -24,14 +24,14 @@ static const int Distance_MAX = d120;
 const int d180_stop = 5004;
 
 static const int Rotate_45deg = 185;
-const int Rotate_90deg = 393;//379; (for 300)//385;//357;
-const int L_offset = 0;//-4; (for 300)//385;//357;
-const int Rotate_180deg = 793;//Rotate_90deg * 2.057;
+const int Rotate_90deg = 365; //367(for 300) //394;//(for 200)//385;//357;
+const int L_offset = 2; //(for 300)0;//385;//357;
+const int Rotate_180deg = 766;//Rotate_90deg * 2.057;
 const int Rotate_270deg = Rotate_90deg * 3.3;
 const int Rotate_360deg = Rotate_90deg * 4.51;
 
 const int MSpeed = 350;
-const int MSpeedR = 200;
+const int MSpeedR = 300;//200;
 const int MSpeedC = 150;
 const int offset = 0;//-10; //M1 Speed offset (Going abt 20pwm faster)
 

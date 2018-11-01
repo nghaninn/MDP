@@ -106,7 +106,7 @@ double Movement::computePID() {
   double kp, ki, kd, p, i, d, pid, error;
 
   kp = 8;
-  ki = 0.34;//0.35;
+  ki = 0.35;
   kd = 0.32;//.5;
 
 //250 setspeed
@@ -266,7 +266,7 @@ double Movement::computePIDShort() {
   double kp, ki, kd, p, i, d, pid, error;
 
   kp = 8;
-  ki = 0.34;//0.35;
+  ki = 0.34;
   kd = 0.32;//.5;
 
 //250 setspeed

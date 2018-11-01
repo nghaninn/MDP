@@ -3,7 +3,8 @@
 #include "Global.h"
 
 //char commands;
-String commands = "";//"F,C,M6,R,M6,L,M8,R,M5,L,M3,R,M1,C";
+String commands = "";//"";//"F,C,M6,R,M6,L,M8,R,M5,L,M3,R,M1,C";
+//@"S9,S9,F,R,M8,L,M13,R,M4,C2,L,M4,C2,F";
 String pre_command = "";
 
 bool isFastestPath = false;
@@ -215,11 +216,12 @@ bool executeCommand(String command) {
     if (isFastestPath) {
       delay(150);
     } else
-      delay(150);
+      delay(50);
 
     LEFT_CAL_COUNT++;
   }
 
+//  if (!isFastestPath) {
   if (ALREADY_SENT_OUT_SENSOR == 0 && !isFastestPath) {
     if(!DEBUG) s->printAllSensors();
     ALREADY_SENT_OUT_SENSOR++;

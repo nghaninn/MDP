@@ -15,4 +15,4 @@ static bool CALIB_SENSORS_PRINTVALUES = false;
 static int ALREADY_SENT_OUT_SENSOR = 0;
 static int LEFT_CAL_COUNT = 0;
 
-static const int LEFT_CAL_LIMIT = 0;
+static const int LEFT_CAL_LIMIT = 3;

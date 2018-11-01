@@ -11,7 +11,7 @@ Sensor::Sensor() {
   analogReference(DEFAULT);
 
   if (SENSOR_STABILITY_TEST)
-    NB_SAMPLE = 7;//5
+    NB_SAMPLE = 10;//5
 }
 
 //void Sensor::detect() {

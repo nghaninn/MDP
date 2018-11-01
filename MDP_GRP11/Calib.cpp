@@ -54,23 +54,25 @@ void Calib::selfCalibFront() {
 
 void Calib::calibFrontLeft() {
   isCalibrating = true;
-//  if (sensor->hasObstacleForSelfCalib_Front() == 1) {
-    if (DEBUG_CALIB) Serial.println("\nCALIB FRONT LEFT\n");
+  //  if (sensor->hasObstacleForSelfCalib_Front() == 1) {
+  if (DEBUG_CALIB) Serial.println("\nCALIB FRONT LEFT\n");
 
-    calibForward(true, true);
-    calibWallFront_L();
-//  }
+  calibForward(true, true);
+  calibWallFront_L();
+  //  }
+  LEFT_CAL_COUNT = 0;
   isCalibrating = false;
 }
 
 void Calib::calibFrontRight() {
   isCalibrating = true;
-//  if (sensor->hasObstacleForSelfCalib_Front() == 2) {
-    if (DEBUG_CALIB) Serial.println("\nCALIB FRONT RIGHT\n");
+  //  if (sensor->hasObstacleForSelfCalib_Front() == 2) {
+  if (DEBUG_CALIB) Serial.println("\nCALIB FRONT RIGHT\n");
 
-    calibForward(true, true);
-    calibWallFront_R();
-//  }
+  calibForward(true, true);
+  calibWallFront_R();
+  //  }
+  LEFT_CAL_COUNT = 0;
   isCalibrating = false;
 }
 
@@ -94,7 +96,7 @@ void Calib::calibLeft() {
     mov->rotateR(90);
     calibDelay();
 
-    calibWallL();
+//    calibWallL();
     LEFT_CAL_COUNT = 0;
   }
 
@@ -137,8 +139,8 @@ void Calib::calib() {
       mov->rotate(90);
       calibDelay();
 
-      sensor->readLeftSensorRawValues();
-      calibWallL();
+//      sensor->readLeftSensorRawValues();
+//      calibWallL();
       LEFT_CAL_COUNT = 0;
     }
   }
@@ -243,9 +245,9 @@ void Calib::calibWallF() {
     correspondingFL = map(map(rFR, sFR_Limit[0], sFR_Limit[1], 0, 5000), 0, 5000, sFL_Limit[0], sFL_Limit[1]);
     if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingFL));
 
-    if ((correspondingFL + FLFR_Calib_Offset - rFL ) < -1) { //rotate right
+    if ((correspondingFL + FLFR_Calib_Offset - rFL ) < -2) { //rotate right
       distance = 1;
-    } else if ((correspondingFL + FLFR_Calib_Offset - rFL) > 1) { // rotate left
+    } else if ((correspondingFL + FLFR_Calib_Offset - rFL) > 2) { // rotate left
       distance = -1;
     }
 
@@ -287,9 +289,9 @@ void Calib::calibWallL() {
       correspondingLB = map(map(rLF, sLF_Limit[0], sLF_Limit[1], 0, 5000), 0, 5000, sLB_Limit[0], sLB_Limit[1]);
       if (DEBUG_CALIB) Serial.println("Corresponding Distance: " + String(correspondingLB));
 
-      if ((correspondingLB + LB_Calib_Offset - rLB) < -1) { //rotate right
+      if ((correspondingLB + LB_Calib_Offset - rLB) < -2) { //rotate right
         distance = 1;
-      } else if ((correspondingLB + LB_Calib_Offset - rLB) > 1) { // rotate left
+      } else if ((correspondingLB + LB_Calib_Offset - rLB) > 2) { // rotate left
         distance = -1;
       }
 
